@@ -1,0 +1,124 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Property{% endblock %}
+
+{% block body %}
+    <h1>Create Property</h1>
+
+    <hr class="my-4">
+
+    {{ form_start(propertyForm) }}
+
+        <div class="row mb-3">
+            <div class="col-6">
+                {{ form_label(propertyForm.name) }}
+                {{ form_widget(propertyForm.name, {attr: {class: 'form-control'}}) }}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-3">
+                {{ form_label(propertyForm.type) }}
+                <hr class="hr-sm">
+                {{ form_widget(propertyForm.type, {attr: {class: 'form-select'}}) }}
+            </div>
+            <div class="col-9 units-creator">
+                <div class="row">
+                    <div class="col-4">
+                        <label for="unit_multiplier_0">{% trans %}Multiplier{% endtrans %}</label>
+                    </div>
+                    <div class="col-4">
+                        <label for="unit_name_0">{% trans %}Unit name{% endtrans %}</label>
+                    </div>
+                    <div class="col-3">
+                        <label for="unit_name_0">{% trans %}Default{% endtrans %}</label>
+                    </div>
+                    <div class="col-1"></div>
+                </div>
+
+                <hr class="hr-sm">
+
+                <div class="units-list">
+                    <div class="unit mb-2" data-id="0">
+                        <div class="row">
+                            <div class="col-4">
+                                <input type="text" id="unit_multiplier_0" class="form-control" name="units[multiplier][0]"  />
+                            </div>
+                            <div class="col-4">
+                                <input type="text" id="unit_name_0" class="form-control" name="units[name][0]" />
+                            </div>
+                            <div class="col-3 d-flex align-items-center">
+                                <input type="radio" id="unit_default_0" name="units[default]" value="0" checked />
+                            </div>
+                            <div class="col-1 d-flex align-items-center">
+                                <button type="button" class="btn btn-success btn-sm unit-add"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {{ form_widget(propertyForm.submit, {attr: {class: 'btn btn-dark'}}) }}
+
+    {{ form_end(propertyForm) }}
+
+
+<script>
+$(document).ready(function () {
+
+    $(document).on("input", "[name='property[type]']", function() {
+        
+        var input = $(this)
+        var type = input.val()
+
+        if(type == 'integer' || type == 'decimal') {
+            $(".units-creator").show()
+        }
+        else {
+            $(".units-creator").hide()
+        }
+
+    })
+
+    $(document).on("click", ".unit-add", function() {
+        
+        var unitsList = $(".units-list")
+
+        var lastId = parseInt(unitsList.find(".unit:last-child").data("id"));
+
+        var nextUnit = `
+            <div class="unit mb-2" data-id="%id%">
+                <div class="row">
+                    <div class="col-4">
+                        <input type="text" id="unit_multiplier_%id%" class="form-control" name="units[multiplier][%id%]"  />
+                    </div>
+                    <div class="col-4">
+                        <input type="text" id="unit_name_%id%" class="form-control" name="units[name][%id%]" />
+                    </div>
+                    <div class="col-3 d-flex align-items-center">
+                        <input type="radio" id="unit_default_%id%" name="units[default]" value="%id%" />
+                    </div>
+                    <div class="col-1 d-flex align-items-center">
+                        <button type="button" class="btn btn-danger btn-sm unit-remove" data-id="%id%"><i class="fa-solid fa-minus"></i></button>
+                    </div>
+                </div>
+            </div>
+        `
+
+        var nextUnit = nextUnit.replaceAll(/%id%/g, (lastId + 1))
+        unitsList.append(nextUnit)
+
+    })
+
+    $(document).on("click", ".unit-remove", function() {
+        var unitId = $(this).data("id")
+        $(".unit[data-id='" + unitId + "']").remove()
+    })
+
+})
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,157 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block body %}
+    <h1>{{ product.name }}</h1>
+    <ul class="breadcrumb">
+        {% for category in path %}
+            {% if loop.last %}
+            <li class="breadcrumb-item active">{{ category.name }}</li>
+            {% else %}
+            <li class="breadcrumb-item">{{ category.name }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    <hr class="my-4">
+
+    <div class="row">
+
+        <div class="col-5">
+            <div class="card bg-secondary">
+                {% if product.highlights is not null %}
+                <div class="img-card-top" style="height: 40em"></div>
+                {% else %}
+                <div class="img-card-top" style="height: 30em"></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-4">
+
+            <table class="table table-borderless table-sm">
+            <tbody>
+            {% for value in product.propertyValues %}
+                <tr>
+                <th class="ps-0">{{ value.property.name }}</th>
+                <td>
+                {% if value.property.type == 'integer' %}
+                    {{ value.number }}
+                {% elseif value.property.type == 'decimal' %}
+                    {{ value.floatingPointNumber }}
+                {% else %}
+                    {{ value.text }}
+                {% endif %}
+
+                {% if value.unit %}
+                    {{ value.unit }}
+                {% endif %}
+                </td>
+                </tr>
+            {% endfor %}
+            
+            {% for property in product.additionalProperties %}
+                <tr>
+                <th class="ps-0">{{ property.name }}</th>
+                <td>{{ property.value }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+
+            <table class="table table-borderless table-sm m-0 text-secondary small">
+
+                {% if product.sku %}
+                    <tr><th class="ps-0 py-0 text-nowrap" style="width:1%">{% trans %}SKU{% endtrans %}</th><td class="py-0">{{ product.sku }}</td></tr>
+                {% endif %}
+
+                {% if product.ean %}
+                    <tr><th class="ps-0 py-0 text-nowrap">{% trans %}EAN{% endtrans %}</th><td class="py-0">{{ product.ean }}<br>
+                {% endif %}
+
+                {% if product.gtin %}
+                    <tr><th class="ps-0 py-0 text-nowrap">{% trans %}GTIN{% endtrans %}</th><td class="py-0">{{ product.gtin }}<br>
+                {% endif %}
+
+                {% if product.isbn %}
+                    <tr><th class="ps-0 py-0 text-nowrap">{% trans %}ISBN{% endtrans %}</th><td class="py-0">{{ product.isbn }}<br>
+                {% endif %}
+
+                {% if product.manufacturerCode %}
+                    <tr><th class="ps-0 py-0 text-nowrap">{% trans %}MFG{% endtrans %}</th><td class="py-0">{{ product.manufacturerCode }}<br>
+                {% endif %}
+
+                {% if product.modelNumber %}
+                    <tr><th class="ps-0 py-0 text-nowrap">{% trans %}Model number{% endtrans %}</th><td class="py-0">{{ product.modelNumber }}<br>
+                {% endif %}
+
+            </table>
+
+            {% if product.highlights is not null %}
+            <ul class="mt-3 small">
+                {% for highlight in product.highlights %}
+                    <li>{{ highlight }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+        </div>
+
+        <div class="col-3">
+
+            <div class="card">
+                <div class="card-body">
+
+                    {% include '/product/price.html.twig' %}
+
+                    <button class="btn btn-warning w-100 rounded-pill">{% trans %}Add to cart{% endtrans %}</button>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row mt-5">
+
+        <div class="col-6">
+
+            <h4 class="fs-4">Technical specification</h4>
+
+            <table class="table table-striped-columns table-sm">
+
+            {% for value in product.propertyValues %}
+                <tr>
+                <td class="ps-0">{{ value.property.name }}</td>
+                <td>
+                {% if value.property.type == 'integer' %}
+                    {{ value.number }}
+                {% elseif value.property.type == 'decimal' %}
+                    {{ value.floatingPointNumber }}
+                {% else %}
+                    {{ value.text }}
+                {% endif %}
+
+                {% if value.unit %}
+                    {{ value.unit }}
+                {% endif %}
+                </td>
+                </tr>
+            {% endfor %}
+            
+            {% for property in product.additionalProperties %}
+                <tr>
+                <td class="ps-0">{{ property.name }}</td>
+                <td>{{ property.value }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+
+        </div>
+
+    </div>
+
+
+{% endblock %}

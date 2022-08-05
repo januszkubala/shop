@@ -1,0 +1,831 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Product{% endblock %}
+
+{% block body %}
+    <h1>Create Product</h1>
+
+    <hr class="my-4">
+
+    {{ form_start(productForm) }}
+
+    <h4>{% trans %}Product identification{% endtrans %}</h4>
+    
+        <div class="row mb-3">
+
+            <div class="col-6">
+                {{ form_label(productForm.name) }}
+                {{ form_widget(productForm.name, {attr: {class: 'form-control'}}) }}
+                
+                {% if productForm.name.vars.help is not null %}
+                <div class="form-text">
+                    {{ form_help(productForm.name) }}
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="row mb-2">
+
+            <div class="col">    
+                {{ form_label(productForm.sku) }}
+                {{ form_widget(productForm.sku, {attr: {class: 'form-control'}}) }}
+
+                {% if productForm.sku.vars.help is not null %}
+                <div class="form-text">
+                    {{ form_help(productForm.sku) }}
+                </div>
+                {% endif %}
+            </div>
+        
+            <div class="col">    
+                {{ form_label(productForm.ean) }}
+                {{ form_widget(productForm.ean, {attr: {class: 'form-control'}}) }}
+
+                {% if productForm.ean.vars.help is not null %}
+                <div class="form-text">
+                    {{ form_help(productForm.ean) }}
+                </div>
+                {% endif %}
+            </div>
+        
+            <div class="col">    
+                {{ form_label(productForm.gtin) }}
+                {{ form_widget(productForm.gtin, {attr: {class: 'form-control'}}) }}
+
+                {% if productForm.gtin.vars.help is not null %}
+                <div class="form-text">
+                    {{ form_help(productForm.gtin) }}
+                </div>
+                {% endif %}
+            </div>
+        
+            <div class="col">    
+                {{ form_label(productForm.isbn) }}
+                {{ form_widget(productForm.isbn, {attr: {class: 'form-control'}}) }}
+
+                {% if productForm.isbn.vars.help is not null %}
+                <div class="form-text">
+                    {{ form_help(productForm.isbn) }}
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="row mb-2">
+
+            <div class="col-3">
+                {{ form_label(productForm.manufacturerCode) }}
+                {{ form_widget(productForm.manufacturerCode, {attr: {class: 'form-control'}}) }}
+
+                {% if productForm.manufacturerCode.vars.help is not null %}
+                <div class="form-text">
+                    {{ form_help(productForm.manufacturerCode) }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-3">
+                {{ form_label(productForm.modelNumber) }}
+                {{ form_widget(productForm.modelNumber, {attr: {class: 'form-control'}}) }}
+
+                {% if productForm.modelNumber.vars.help is not null %}
+                <div class="form-text">
+                    {{ form_help(productForm.modelNumber) }}
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    <hr class="my-4">
+
+    <h4>{% trans %}Price and availability{% endtrans %}</h4>
+        
+        <div class="row">
+            <div class="col-9">
+                <div class="row">
+
+                    <div class="col-4">
+                        {{ form_label(productForm.price) }}
+                        {{ form_widget(productForm.price, {attr: {class: 'form-control'}}) }}
+
+                        {% if productForm.price.vars.help is not null %}
+                        <div class="form-text">
+                            {{ form_help(productForm.price) }}
+                        </div>
+                        {% endif %}
+                    </div>
+                
+                    <div class="col-4">
+                        {{ form_label(productForm.tax) }}
+                        {{ form_widget(productForm.tax, {attr: {class: 'form-select'}}) }}
+
+                        {% if productForm.tax.vars.help is not null %}
+                        <div class="form-text">
+                            {{ form_help(productForm.tax) }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-4">
+                        {{ form_label(productForm.stock) }}
+                        {{ form_widget(productForm.stock, {attr: {class: 'form-control'}}) }}
+
+                        {% if productForm.stock.vars.help is not null %}
+                        <div class="form-text">
+                            {{ form_help(productForm.stock) }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+    <h4>{% trans %}Assignment{% endtrans %}</h4>
+
+        <div class="my-3">
+        {% for radioAssignment in productForm.assignment %}
+            <div class="form-check">
+            {{ form_widget(radioAssignment, {attr: {class: 'form-check-input product-assignment'}}) }}
+            {{ form_label(radioAssignment) }}
+            </div>
+        {% endfor %}
+        </div>
+        <div class="form-text">
+            {{ form_help(productForm.assignment) }}
+        </div>
+
+        <div class="picker product-assignment-picker picker-category">
+            {{ form_widget(productForm.category) }}
+
+            <div id="category_path"></div>
+
+            <div class="mt-2 text-center">
+                <a href="javascript:void(0)" class="pick btn btn-success">
+                    {% trans %}Pick category{% endtrans %}
+                </a>
+            </div>
+        </div>
+
+        <div class="picker product-assignment-picker picker-parent-product">
+            {{ form_widget(productForm.parent) }}
+
+            <div id="parent_product"></div>
+
+            <div class="mt-2 text-center">
+                <a href="javascript:void(0)" class="pick btn btn-success">
+                    {% trans %}Pick parent product{% endtrans %}
+                </a>
+            </div>
+        </div>
+
+    <hr class="my-4">
+
+    <h4>{% trans %}Product specification and data{% endtrans %}</h4>
+
+        <div class="row my-3">
+            <div class="product-properties col-6"></div>
+            <div class="product-additional-properties col-6">
+
+                <div class="additional-property row mb-2" data-id="0">
+                    <div class="col-5">
+                        <input type="text" class="form-control" name="additional_property[0][name]" value="" placeholder="{% trans %}Property name{% endtrans %}" />
+                    </div>
+                    <div class="col-5">
+                        <input type="text" class="form-control" name="additional_property[0][value]" value="" placeholder="{% trans %}Property value{% endtrans %}" />
+                    </div>
+                    <div class="col-2 text-end">
+                        <button type="button" class="product-additional-properties-add btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    <hr class="my-4">
+
+    <h4>{% trans %}Item highlights{% endtrans %}</h4>
+    <div class="form-text">
+        <p>{% trans %}Add some features describing this product to make it more attractive to your customers.{% endtrans %}</p>
+    </div>
+    <div>
+
+        <div class="row mb-2">
+
+            <div class="product-highlights col-6" id="product-highlights">
+
+                <div class="row highlight mb-2" data-id="0">
+                    <div class="col-10">
+                        <textarea name="product[highlights][0]" cols="40" rows="2" class="form-control"></textarea>
+                    </div>
+                    <div class="col-2 text-end">
+                        <button type="button" class="product-highlights-add btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% do productForm.highlights.setRendered %}
+
+
+
+    {{ form_end(productForm) }}
+
+    <div class="modal fade modal-lg picker-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h6 class="modal-title"></h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans %}Close{% endtrans %}"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="modal-body-help mb-3">
+
+                    </div>
+
+                    <div class="modal-body-content">
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans %}Close{% endtrans %}</button>
+                    <button type="button" class="btn btn-success disabled picker-pick" disabled>{% trans %}Pick{% endtrans %}</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+<script>
+
+$(document).ready(function() {
+
+    var picker = $(".modal.picker-modal")
+    var modalTitle = $(picker).find(".modal-title")
+    var modalHelpContainer = $(picker).find(".modal-body-help")
+    var modalContentContainer = $(picker).find(".modal-body-content")
+    var productContainer = $("#parent_product")
+
+    $(document).on("click", ".picker-parent-product .pick", function() {
+
+        picker.find(".picker-pick").hide()
+        modalTitle.text("{% trans %}Pick product{% endtrans %}")
+        modalHelpContainer.text(`{% trans %}Lorem ipsum dolor sit amet, 
+        consectetur adipiscing elit. Curabitur in interdum sem. Sed non libero nec nisi dapibus consectetur.
+        Nunc ut elit id diam interdum suscipit in gravida leo.{% endtrans %}`)
+        picker.modal("show")
+        modalContentContainer.empty()
+
+        var searchBar = $("<div />")
+        var search = $("<input />").addClass("form-control").prop({placeholder: '{% trans %}Search for products{% endtrans %}'}).appendTo(searchBar)
+        var searchResults = $("<div />").addClass("card mt-3 pt-3 px-3").hide()
+        modalContentContainer.append(searchBar)
+        modalContentContainer.append(searchResults)
+
+        var timeout = null
+
+        $(document).on("input", search, function() {
+
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                
+                var query = search.val().trim()
+                
+                if(query.length > 2) {
+                    $.ajax({
+                        method: "GET",
+                        url: "/product/search",
+                        data: {query: query},
+                        success: function(json) {
+                            
+                            searchResults.empty()
+                            json = JSON.parse(JSON.stringify(json))
+
+                            if(json.length === 0) {
+                                searchResults.hide()
+                                return false
+                            }
+
+                            for(var key in json) {
+                                var product = json[key]
+                                var result = `
+                                <div class="mb-3">
+                                    <div class="text-category small">${product['category']['name']}</div>
+                                    <div class="result-name">
+                                        <a href="javascript:void(0)" class="product-pick" data-product="${product['id']}" data-product-name="${product['name']}" data-category="${product['category']['id']}" data-category-name="${product['category']['name']}">${product['name']}</a>
+                                    </div>
+                                </div>
+                                `
+                                searchResults.append(result)
+                            }
+
+                            searchResults.show()
+
+                        }
+                    })
+                }
+                else {
+                    searchResults.empty().hide()
+                }
+
+            }, 500)
+            
+
+        })
+
+        $(document).on("click", ".product-pick", function() {
+            
+            var productId = $(this).data("product")
+            var productName = $(this).data("product-name")
+            var categoryId = $(this).data("category")
+            var categoryName = $(this).data("category-name")
+
+            var product = `
+            <div>
+                <div class="text-secondary small">${categoryName}</div>
+                <div class="result-name">${productName}</div>
+            </div>
+            `
+            $("#product_parent").val(productId);
+            productContainer.html(product)
+
+            $.ajax({
+                method: "GET",
+                url: "/category/properties",
+                data: {id: categoryId, ip: true, fill: productId},
+                success: function(response) {
+                    
+                    var json = JSON.parse(JSON.stringify(response))
+                    $(".product-properties").empty()
+                    $(".product-additional-properties").empty();
+                    
+
+                    for(var property in json.properties) {
+                        
+                        var prefilled = json["prefilledProperties"][json.properties[property]["id"]];
+                        var prefilledValue = ""
+                        var prefilledUnit = ""
+
+                        if(typeof prefilled !== "undefined") {
+
+                            if(typeof prefilled["number"] !== "undefined" && prefilled["number"] != null) {
+                                prefilledValue = prefilled["number"]
+                            }
+                            else if(typeof prefilled["floatingPointNumber"] !== "undefined" && prefilled["floatingPointNumber"] != null) {
+                                prefilledValue = prefilled["floatingPointNumber"].replace(".00", "")
+                            }
+                            else if(typeof prefilled["text"] !== "undefined" && prefilled["text"] != null) {
+                                prefilledValue = prefilled["text"]
+                            }
+
+                            if(typeof prefilled["unit"] !== "undefined" && prefilled["unit"] != null) {
+                                prefilledUnit = prefilled["unit"]
+                            }
+
+                        }
+                        
+                        var propertyField = `
+                        <div class="product-property row mb-2">
+                            <div class="col-5">
+                                <label for="property_${json.properties[property]["id"]}">${json.properties[property]["name"]}</label>
+                            </div>
+                            <div class="col-5">
+                                <input type="text" name="property[${json.properties[property]["id"]}][value]" id="property_${json.properties[property]["id"]}" value="${prefilledValue}" class="form-control">
+                            </div>
+                        `
+
+                        if(json.properties[property]["units"].length > 0) {
+                            propertyField += `
+                                <div class="col-2">
+                                    <select class="form-select" name="property[${json.properties[property]["id"]}][unit]">
+                            `
+
+                                for(var unit in json.properties[property]["units"]) {
+                                    
+                                    if(prefilledUnit == json.properties[property]["units"][unit]["name"]) {
+                                    propertyField += `
+                                        <option value="${json.properties[property]["units"][unit]["name"]}" selected>
+                                    `
+                                    }
+                                    else {
+                                    propertyField += `
+                                        <option value="${json.properties[property]["units"][unit]["name"]}">
+                                    `
+                                    }
+
+                                    propertyField += `
+                                            ${json.properties[property]["units"][unit]["name"]}
+                                        </option>
+                                    `
+
+                                }
+
+                            propertyField += `
+                                    </select>
+                                </div>
+                            `
+                        }
+
+                        propertyField += `
+                        </div>
+                        `
+
+                        $(".product-properties").append(propertyField)
+
+                    }
+
+                    for(var index in json.prefilledAdditionalProperties) {
+                        
+                        var property = json.prefilledAdditionalProperties[index]
+
+                        var newOption = `
+                            <div class="additional-property row mb-2" data-id="${index}">
+                                <div class="col-5">
+                                    <input type="text" class="form-control" name="additional_property[${index}][name]" value="${property.name}" placeholder="{% trans %}Property name{% endtrans %}" />
+                                </div>
+                                <div class="col-5">
+                                    <input type="text" class="form-control" name="additional_property[${index}][value]" value="${property.value}" placeholder="{% trans %}Property value{% endtrans %}" />
+                                </div>
+                                <div class="col-2 text-end">
+                        `
+
+                        if(index == 0) {
+                            newOption += `
+                                <button type="button" class="product-additional-properties-add btn btn-sm btn-success" data-id="${index}"><i class="fa-solid fa-plus"></i></button>
+                            `
+                        }
+                        else {
+                            newOption += `
+                                <button type="button" class="product-additional-properties-remove btn btn-sm btn-danger" data-id="${index}"><i class="fa-solid fa-minus"></i></button>
+                            `
+                        }
+
+                        newOption += `
+                                </div>
+                            </div>
+                        `
+
+                        $(".product-additional-properties").append(newOption)
+
+                    }
+
+                }
+            })
+
+            picker.modal("hide")
+
+        })
+
+    })
+
+})
+
+$(document).ready(function() {
+
+    $(document).on("change", ".product-assignment", function() {
+        
+        $(".product-assignment-picker").hide()
+        var assignment = $(this).val()
+
+        switch(assignment) {
+            case 'parent':
+                $(".product-assignment-picker.picker-parent-product").show()
+            break
+
+            case 'category':
+                $(".product-assignment-picker.picker-category").show()
+            break
+        }
+
+    })
+
+    $(".product-assignment:checked").trigger("change")
+
+})
+
+$(document).ready(function() {
+
+    var picker = $(".modal.picker-modal")
+    var modalTitle = $(picker).find(".modal-title")
+    var modalHelpContainer = $(picker).find(".modal-body-help")
+    var modalContentContainer = $(picker).find(".modal-body-content")
+
+    $(document).on("click", ".picker-category .pick", function() {
+
+        $(picker).find(".picker-pick").show()
+        $(modalTitle).text("{% trans %}Pick category{% endtrans %}")
+        $(modalHelpContainer).text(`{% trans %}Lorem ipsum dolor sit amet, 
+        consectetur adipiscing elit. Curabitur in interdum sem. Sed non libero nec nisi dapibus consectetur.
+        Nunc ut elit id diam interdum suscipit in gravida leo.{% endtrans %}`)
+        $(picker).modal("show")
+        $(modalContentContainer).empty()
+
+        var row = $("<div />").addClass("row").appendTo($(modalContentContainer))
+
+        var loader = `
+        <div class="col loader">
+            <div class="card h-100">
+                <i class="fas fa-spinner fa-pulse fa-3x m-auto"></i>
+            </div>
+        </div>
+        `
+
+        row.append(loader)
+        
+        $.ajax({
+            method: "GET",
+            url: "/category/pick",
+            data: {parent: null},
+            success: function(json) {
+                json = JSON.parse(JSON.stringify(json))
+
+                var column = `
+                <div class="col">
+                    <select class="form-control picker-select" size="10">
+                        <option value=""></option>
+                `
+                for(var category in json) {
+                    column += `<option value="${json[category]}">${category}</option>`
+                }
+
+                column += `
+                    </select>
+                </div>
+                `
+                $(".loader").remove()
+                row.append(column)
+            }
+        })
+
+        $(modalContentContainer).on("change", "select", function() {
+
+            var select = $(this)
+            var parent = parseInt(select.val())
+
+            $(select).parents(".col:first").nextAll(".col").remove()
+
+            
+            var loader = `
+            <div class="col loader">
+                <div class="card h-100">
+                    <i class="fas fa-spinner fa-pulse fa-3x m-auto"></i>
+                </div>
+            </div>
+            `
+
+            row.append(loader)
+            
+            var selected = `
+                <div class="card bg-success text-light h-100">
+                    <i class="fa-solid fa-circle-check fa-3x m-auto"></i>
+                </div>
+            `
+
+            if(parent > 0) {
+                
+                $.ajax({
+                    method: "GET",
+                    url: "/category/pick",
+                    data: {parent: parent},
+                    success: function(json) {
+                        
+                        json = JSON.parse(JSON.stringify(json))
+
+                        var newColumn = `
+                            <div class="col">
+                                <select class="form-control" size="10">
+                                <option value=""></option>
+                        `
+                        for(var category in json) {
+                            newColumn += `<option value="${json[category]}">${category}</option>`
+                        }
+                        newColumn += `
+                                </select>
+                            </div>
+                        `
+                        $(select).parents(".col:first").nextAll(".col").remove()
+                        $(".loader").remove()
+                        row.append(newColumn)
+
+                        var nextOptions = parseInt($(row).find(".col:last-child select").find("option").length)
+                        $(picker).find(".modal-footer .picker-pick").addClass("disabled").attr({disabled: true})
+
+                        if(!(nextOptions > 1)) {
+
+                            var lastColumn = $(row).find(".col:last-child")
+
+                            $(lastColumn).find("select").replaceWith(selected)
+
+                            $(picker).find(".modal-footer .picker-pick").removeClass("disabled").attr({disabled: false})
+
+                        }
+                    }
+                })
+            }
+            else {
+                var lastColumn = $(row).find(".col:last-child")
+                $(lastColumn).html(selected)
+            }
+        })
+    })
+
+    $(picker).on("click", ".modal-footer .picker-pick", function() {
+        
+        $("#category_path").empty()
+
+        if(!($(this).is(":disabled"))) {
+            var selected = null
+            $(picker).find($("select")).each(function() {
+                if($(this).val() != "") {
+                    selected = $(this).val()
+                }
+            })
+
+            if(selected != null) {
+                
+                $.ajax({
+                    method: "GET",
+                    url: "/category/path",
+                    data: {id: selected},
+                    success: function(response) {
+                        
+                        var json = JSON.parse(JSON.stringify(response))
+                        var path = []
+                        
+                        for(var category in json) {
+                            path.push(json[category])
+                        }
+
+                        if(path.length > 0) {
+                            $("#product_category").val(selected)
+                            var breadcrumbs = $("<ul />").addClass("breadcrumb my-3 p-3 rounded bg-dark text-light").appendTo($("#category_path"));
+
+                            var i = 1
+                            for(var breadcrumb in path) {
+
+                                var breadCrumbContainer = `
+                                <li class="breadcrumb-item">${path[breadcrumb]}</li>
+                                `
+
+                                if(i == path.length) {
+                                    var breadCrumbContainer = `
+                                    <li class="breadcrumb-item active">${path[breadcrumb]}</li>
+                                    `
+                                }
+
+                                breadcrumbs.append(breadCrumbContainer)
+                                i++
+                            }
+
+                            $.ajax({
+                                method: "GET",
+                                url: "/category/properties",
+                                data: {id: selected, ip: true},
+                                success: function(response) {
+                                    
+                                    var json = JSON.parse(JSON.stringify(response))
+                                    $(".product-properties").empty()
+                                    
+                                    for(var property in json) {
+                                        
+                                        var propertyField = `
+                                        <div class="product-property row mb-2">
+                                            <div class="col-5">
+                                                <label for="property_${json[property]['id']}">${json[property]['name']}</label>
+                                            </div>
+                                            <div class="col-5">
+                                                <input type="text" name="property[${json[property]['id']}][value]" id="property_${json[property]['id']}" class="form-control">
+                                            </div>
+                                        `
+
+                                        if(json[property]['units'].length > 0) {
+                                            propertyField += `
+                                                <div class="col-2">
+                                                    <select class="form-select" name="property[${json[property]['id']}][unit]">
+                                            `
+
+                                                for(var unit in json[property]['units']) {
+
+                                                    if(json[property]['units'][unit]['default']) {
+                                                        propertyField += `
+                                                        <option value="${json[property]['units'][unit]['name']}" selected>
+                                                        `
+                                                    }
+                                                    else {
+                                                        propertyField += `
+                                                        <option value="${json[property]['units'][unit]['name']}">
+                                                        `
+                                                    }
+
+                                                    propertyField += json[property]['units'][unit]['name'] + `
+                                                        </option>
+                                                    `
+
+                                                }
+
+                                            propertyField += `
+                                                    </select>
+                                                </div>
+                                            `
+                                        }
+
+                                        propertyField += `
+                                        </div>
+                                        `
+
+                                        $(".product-properties").append(propertyField)
+
+                                        $(picker).modal("hide")
+
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+            }
+        }
+    })
+})
+
+$(document).ready(function() {
+
+    $(document).on("click", ".product-additional-properties-add", function() {
+
+        var newOption = `
+            <div class="additional-property row mb-2" data-id="%id%">
+                <div class="col-5">
+                    <input type="text" class="form-control" name="additional_property[%id%][name]" value="" placeholder="{% trans %}Property name{% endtrans %}" />
+                </div>
+                <div class="col-5">
+                    <input type="text" class="form-control" name="additional_property[%id%][value]" value="" placeholder="{% trans %}Property value{% endtrans %}" />
+                </div>
+                <div class="col-2 text-end">
+                    <button type="button" class="product-additional-properties-remove btn btn-sm btn-danger" data-id="%id%"><i class="fa-solid fa-minus"></i></button>
+                </div>
+            </div>
+        `
+
+        var lastId = parseInt($(".product-additional-properties").find(".additional-property:last-child").data("id"))
+        $(".product-additional-properties").append(newOption.replaceAll(/%id%/g, (lastId + 1)))
+
+    })
+
+    $(document).on("click", ".product-additional-properties-remove", function() {
+
+        var id = $(this).data("id")
+        $(".additional-property[data-id=" + id + "]").remove()
+
+    })
+
+})
+
+$(document).ready(function() {
+
+    $(document).on("click", ".product-highlights-add", function() {
+
+        var newHighlight = `
+            <div class="row highlight mb-2" data-id="%id%">
+                <div class="col-10">
+                    <textarea name="product[highlights][%id%]" cols="40" rows="2" class="form-control"></textarea>
+                </div>
+                <div class="col-2 text-end">
+                    <button type="button" class="product-highlights-remove btn btn-sm btn-danger" data-id="%id%"><i class="fa-solid fa-minus"></i></button>
+                </div>
+            </div>
+        `
+
+        var lastId = parseInt($(".product-highlights").find(".highlight:last-child").data("id"))
+        $(".product-highlights").append(newHighlight.replaceAll(/%id%/g, (lastId + 1)))
+
+    })
+
+    $(document).on("click", ".product-highlights-remove", function() {
+
+        var id = $(this).data("id")
+        $(".highlight[data-id=" + id + "]").remove()
+
+    })
+
+})
+
+</script>
+
+{% endblock %}

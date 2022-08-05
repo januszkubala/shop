@@ -1,0 +1,38 @@
+<div class="price-box mb-3">
+    <h2 class="price text-center">
+        {% if price.previousValue is not null %}
+        <del class="previous-price">
+        {{ (price.previousValue + price.previousValue * price.tax.rate)|round(2) }}
+        </del>
+        {% endif %}
+        {{ ((price.value + price.value * price.tax.rate)|round(2))|split('.', 2)[0] }}<span class="decimal">.{{ ((price.value + price.value * price.tax.rate)|round(2))|split('.', 2)[1] }}</span>
+        
+        {% if price.description is not null %}
+        <div class="price-description mt-2">
+            <span class="p-1 bg-danger rounded text-light">{{ price.description }}</span>
+        </div>
+        {% endif %}
+
+        {% if price.dateValidTo is not null %}
+
+            <ul class="countdown mt-4">
+                <li>Ends in</li>
+                <li><span class="days">00</span> <span class="label text-secondary">{% trans %}d{% endtrans %}</span></li>
+                <li><span class="hours">00</span> <span class="label text-secondary">{% trans %}h{% endtrans %}</span></li>
+                <li><span class="minutes">00</span> <span class="label text-secondary">{% trans %}m{% endtrans %}</span></li>
+                <li><span class="seconds">00</span> <span class="label text-secondary">{% trans %}s{% endtrans %}</span></li>
+            </ul>
+            
+            <script>
+                $(".countdown").downCount({
+                    date: "{{ price.dateValidTo|date('m/d/Y H:i:s') }}",
+                    offset: 2
+                }, function () {
+                    alert('WOOT WOOT, done!');
+                });
+            </script>
+
+        {% endif %}
+
+    </h2>
+</div>

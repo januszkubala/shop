@@ -1,0 +1,88 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Category{% endblock %}
+
+{% block body %}
+    <h1>Create Category</h1>
+
+    <hr class="my-4">
+
+    {{ form_start(categoryForm) }}
+
+        <div class="row mb-3">
+            <div class="col-6">
+                {{ form_label(categoryForm.name) }}
+                {{ form_widget(categoryForm.name, {attr: {class: 'form-control'}}) }}
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-6">
+                {{ form_label(categoryForm.parent) }}
+                {{ form_widget(categoryForm.parent) }}
+
+                <div class="row parent-picker">
+                    <div class="col">
+                        <select class="form-select">
+                            {% for parentId, parentName in parentChoices %}
+                                <option value="{{ parentId }}">{{ parentName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {{ form_widget(categoryForm.submit, {attr: {class: 'btn btn-dark'}}) }}
+
+    {{ form_end(categoryForm) }}
+
+<script>
+
+$(document).ready(function() {
+
+    $(".parent-picker").on("change", "select", function() {
+
+        var row = $(this).parents(".parent-picker:first")
+        $(this).parents(".col:first").nextAll(".col").remove()
+
+        var parent = null
+        $(row).find("select").each(function() {
+            if($(this).val() > 0) {
+                parent = $(this).val()
+            }
+        })
+
+        $("#category_parent").val(parent)
+
+        var selected = $(this).val()
+        
+        if(selected > 0) {
+            
+            $.ajax({
+                method: "get",
+                url: "/category/pick",
+                data: {parent: selected},
+                success: function(json) {
+                    json = JSON.parse(JSON.stringify(json))
+                    var column = $("<div />").addClass("col")
+                    var select = $("<select />").addClass("form-select picker-select").appendTo($(column))
+                    for(var category in json) {
+                        $("<option />").val(json[category]).text(category).appendTo(select)
+                    }
+                    $("<option />").val("").text("-- Current category --").prependTo(select)
+                    $(row).append(column)
+                }
+            })
+
+        }
+
+    })
+
+})
+
+</script>
+
+{% endblock %}
