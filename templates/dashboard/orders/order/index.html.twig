@@ -1,0 +1,157 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}Order #{{ order.id }}{% endblock %}
+
+{% block sidemenu %}
+
+        <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/users/user?id={{ order.id }}">{{ order.firstName }} {{ order.lastName }}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="javascript:void()" onclick="getDocument('order-sheet', {{ order.id }})">
+                {% trans %}Order sheet{% endtrans %}
+                <i class="fa-solid fa-file-pdf float-end fa-fw"></i>
+            </a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/orders/order/{{ order.id }}/payments">
+                Payments
+                {% if payments|length > 0 %}
+                <span class="badge text-bg-warning float-end">{{ payments|length }}</span>
+                {% endif %}
+            </a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/document/order-sheet/?id={{ order.id }}">{% trans %}Invoice{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/document/order-sheet/?id={{ order.id }}">{% trans %}Stock{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/document/order-sheet/?id={{ order.id }}">{% trans %}Delivery docket{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/document/order-sheet/?id={{ order.id }}">{% trans %}Shipment tracking{% endtrans %}</a>
+            
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/orders">{% trans %}Return{% endtrans %}</a>
+        </div>
+
+<script>
+
+function getDocument(document, id) {
+
+    let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=1120,height=680,left=50,top=50`;
+
+    open('/document/' + document + '?id=' + id, '{% trans %}PDF Document{% endtrans %}', params);
+
+}
+
+</script>
+
+{% endblock %}
+
+
+{% block body %}
+
+    <h1>Order</h1>
+    <hr>
+
+        <div class="row">
+        <div class="col-xl-5">
+
+            <h5>{% trans %}Order information{% endtrans %}</h5>
+
+            <table class="table table-sm border-start">
+            <tbody>
+            <tr>
+                <td class="bg-light">{% trans %}Date{% endtrans %}</td>
+                <td>{{ order.date | date('d.m.y H:i') }}</td>
+            </tr>
+            <tr>
+                <td class="bg-light">{% trans %}Order number{% endtrans %}</td>
+                <td>{{ order.id }}</td>
+            </tr>
+            <tr>
+                <td class="bg-light">{% trans %}Current status{% endtrans %}</td>
+                <td>{% include 'chunks/order-status.html.twig' %}</td>
+            </tr>
+            <tr>
+                <td class="bg-light">{% trans %}Net value{% endtrans %}</td>
+                <td>{{ order.netAmount }}</td>
+            </tr>
+            <tr>
+                <td class="bg-light">{% trans %}Taxes{% endtrans %}</td>
+                <td>{{ order.taxAmount }}</td>
+            </tr>
+            <tr>
+                <td class="bg-light">{% trans %}Gross value{% endtrans %}</td>
+                <td>{{ order.amount }}</td>
+            </tr>
+            <tr>
+                <td class="bg-light">{% trans %}Items ordered{% endtrans %}</td>
+                <td>{{ order.quantity }}</td>
+            </tr>
+            <tr>
+                <td class="bg-light">{% trans %}Reference{% endtrans %}</td>
+                <td class="text-uppercase small">{{ order.ref }}</td>
+            </tr>
+            </table>
+        </div>
+        <div class="col-xl-3">
+
+            <h5>{% trans %}Customer{% endtrans %}</h5>
+
+            <b>{{ order.firstName }} {{ order.lastName }}</b><br>
+            {% set address = order %}
+            {% include 'chunks/address.html.twig' %}
+
+        </div>
+        <div class="col-xl-4">
+
+            <h5>{% trans %}Latest payment attempt{% endtrans %}</h5>
+            {% if payments|length > 0 %}
+
+                {% set payment = payments[0] %}
+                {% include 'chunks/payment.html.twig' %}
+
+            {% else %}
+
+                <p class="text-muted">{% trans %}No payment attempts were made for this order.{% endtrans %}</p>
+
+            {% endif %}
+
+        </div>
+        </div>
+
+        <hr>
+
+        <h5>{% trans %}Items in this order{% endtrans %}</h5>
+
+        <table class="table w-100">
+        <thead>
+        <tr class="bg-secondary text-light">
+            <th>{% trans %}Product{% endtrans %}</th>
+            <th>{% trans %}SKU{% endtrans %}</th>
+            <th>{% trans %}Product code{% endtrans %}</th>
+            <th>{% trans %}Net price{% endtrans %}</th>
+            <th>{% trans %}Tax{% endtrans %}</th>
+            <th>{% trans %}Price{% endtrans %}</th>
+            <th>{% trans %}Quantity{% endtrans %}</th>
+            <th>{% trans %}Total{% endtrans %}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for component in components %}
+        <tr class="small">
+            <td><a href="/dashboard/products/product/{{ component.product.id }}">{{ component.name }}</a></td>
+            <td>{{ component.sku }}</td>
+            <td>
+            {% if component.ean != null %}
+                {{ component.ean }}
+            {% elseif component.gtin != null %}
+                {{ component.gtin }}
+            {% elseif component.isbn != null %}
+                {{ component.isbn }}
+            {% endif %}
+            </td>
+            <td>{{ component.netPrice }}</td>
+            <td>{{ component.taxRate * 100 }}%</td>
+            <td>{{ component.price }}</td>
+            <td>{{ component.quantity }}</td>
+            <td>{{ component.amount }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </thead>
+        </table>
+
+{% endblock %}

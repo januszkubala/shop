@@ -26,10 +26,10 @@ class Price
     private ?Tax $tax = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 12, scale: 2)]
-    private ?string $value = null;
+    private ?string $price = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 12, scale: 2, nullable: true)]
-    private ?string $previous_value = null;
+    private ?string $previous_price = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
@@ -84,26 +84,26 @@ class Price
         return $this;
     }
 
-    public function getValue(): ?string
+    public function getPrice(): ?string
     {
-        return $this->value;
+        return $this->price;
     }
 
-    public function setValue(string $value): self
+    public function setPrice(string $price): self
     {
-        $this->value = $value;
+        $this->price = $price;
 
         return $this;
     }
 
-    public function getPreviousValue(): ?string
+    public function getPreviousPrice(): ?string
     {
-        return $this->previous_value;
+        return $this->previous_price;
     }
 
-    public function setPreviousValue(?string $previous_value): self
+    public function setPreviousPrice(?string $previous_price): self
     {
-        $this->previous_value = $previous_value;
+        $this->previous_price = $previous_price;
 
         return $this;
     }

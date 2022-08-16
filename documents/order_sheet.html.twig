@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{% trans %}Order Sheet{% endtrans %}</title>
+
+    <style>
+
+        body {
+            font-family: sans-serif;
+        }
+
+        header h1 {
+            margin: 0 0 5px;
+        }
+
+        header hr {
+            margin: 5px 0 20px;
+            width: 50%;
+            border: none;
+            border-bottom: 1px solid #000;
+        }
+
+        .customer {
+            width: 50%;
+            float: left;
+        }
+
+        .customer p {
+            font-size: 15px;
+            margin: 0 0 10px;
+        }
+
+        .customer address {
+            font-size: 13px;
+            line-height: 16px;
+            font-style: normal;
+        }
+
+        .details {
+            width: 50%;
+            float: left;
+        }
+
+        .details table {
+            margin-top: 28px;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+        .details table th {
+            text-align: left;
+            padding: 0 10px 0 0;
+        }
+
+        .details table td {
+            padding: 1px 0 0 0;
+        }
+
+        .annotations {
+            list-style-type: none;
+            border-top: 1px solid #888;
+            color: #444;
+            margin: 20px 0 0;
+            padding: 5px 0 0;
+            font-size: 11px;
+        }
+
+        .annotations li {
+            margin: 0 0 1px 0;
+            padding: 0;
+        }
+
+        .clear {
+            display: block;
+            clear: both;
+        }
+
+        .items {
+            margin: 80px 0 0;
+        }
+
+        .items table {
+            font-size: 12px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .items table th {
+            padding: 10px 20px;
+            background: #222;
+            color: #fff;
+        }
+
+        .items table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #444;
+        }
+
+
+
+    </style>
+
+</head>
+<body>
+
+    <header>
+    <h1>Order Sheet</h1>
+    <hr>
+    </header>
+
+    <section>
+        <div class="customer">
+            <p>{{ order.firstName }} {{ order.lastName }}</p>
+            <address>
+
+                {{ order.street }}<br>
+                {{ order.city }} {{ order.postalCode }}<br>
+                {{ order.region }}<br>
+                <br>
+                <b>{% trans %}Email{% endtrans %}</b> {{ order.email }}
+                {% if order.phone != null %}
+                   <br><b>{% trans %}Tel.{% endtrans %}</b> {{ order.phone }}
+                {% endif %}
+
+            </address>
+        </div>
+        <div class="details">
+            
+            <table>
+
+                <tr>
+                    <th>{% trans %}Date of order:{% endtrans %}</th>
+                    <td>{{ order.date | date('d.m.y H:i') }}</td>
+                </tr>
+
+                <tr>
+                    <th>{% trans %}Number:{% endtrans %}</th>
+                    <td>{{ order.id }}</td>
+                </tr>
+
+                <tr>
+                    <th>{% trans %}Current stage:{% endtrans %}</th>
+                    <td>
+                        {% if order.status == 'pending' %}
+                            <span class="text-secondary">{% trans %}Pending / awaiting payment{% endtrans %}</span>
+                        {% elseif order.status == 'paid' %}
+                            <span>{% trans %}Paid{% endtrans %}</span>
+                        {% elseif order.status == 'ready_to_ship' %}
+                            <span class="text-warning">{% trans %}Ready to ship{% endtrans %}</span>
+                        {% elseif order.status == 'delivered' %}
+                            <span class="text-success">{% trans %}Delivered{% endtrans %}</span>
+                        {% elseif order.status == 'cancelled' %}
+                            <span class="text-danger">{% trans %}Cancelled{% endtrans %}</span>
+                        {% elseif order.status == 'disputed' %}
+                            <span class="text-danger">{% trans %}Disputed{% endtrans %}</span>
+                        {% elseif order.status == 'refunded' %}
+                            <span class="text-muted">{% trans %}Refunded{% endtrans %}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>{% trans %}Items ordered:{% endtrans %}</th>
+                    <td>{{ order.quantity }}</td>
+                </tr>
+
+                <tr>
+                    <th>{% trans %}Order value*:{% endtrans %}</th>
+                    <td>{{ order.amount }}</td>
+                </tr>
+
+            </table>
+
+            <ul class="annotations">
+                <li>{% trans %}* order value excludes additional costs like delivery fees{% endtrans %}</li>
+            </ul>
+
+        </div>
+    </section>
+
+    <br class="clear">
+
+    <section class="items">
+
+        <table>
+            <thead>
+            <tr>
+                <th>{% trans %}Item name{% endtrans %}</th>
+                <th>{% trans %}SKU{% endtrans %}</th>
+                <th>{% trans %}Code{% endtrans %}</th>
+                <th>{% trans %}Quantity{% endtrans %}</th>
+            </tr>
+
+            {% for item in items %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.sku }}</td>
+                <td>
+                    {% if item.ean != null %}
+                        {{ item.ean }}
+                    {% elseif item.gtin != null %}
+                        {{ item.gtin }}
+                    {% elseif item.isbn != null %}
+                        {{ item.isbn }}
+                    {% endif %}
+                </td>
+                <td>{{ item.quantity }}</td>
+            </tr>
+            {% endfor %}
+
+            </thead>
+
+        </table>
+
+    </section>
+
+</body>
+</html>

@@ -1,0 +1,166 @@
+<div class="shopping-cart-top bg-dark text-light">
+    <div class="container py-2 px-5">
+        <div class="row">
+            <div class="col-9 shopping-cart"></div>
+            <div class="col-3">
+                <a class="btn btn-warning w-100" href="/checkout">{% trans %}Checkout{% endtrans %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+function updateCart() {
+
+    var cartContainer = $(".shopping-cart")
+
+    $.ajax({
+        method: "GET",
+        url: "/api/cart/get",
+        success: function(response) {
+
+            var json = JSON.parse(JSON.stringify(response))
+
+            cartContainer.empty()
+
+            if(typeof json.items !== "undefined" && Object.keys(json.items).length > 0) {
+
+                for(var itemId in json.items) {
+
+                    var item = json.items[itemId]
+
+                    var newItem = `
+                    <div class="row align-items-center mb-2">
+                        <div class="d-none d-lg-flex col-lg-1">
+                            <div class="bg-light rounded img-card-top ratio ratio-1x1"></div>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <a href="product?id=${itemId}" class="text-light">${item['name']}</a>
+                        </div>
+
+                        <div class="col-12 d-lg-none">
+                            <hr>
+                        </div>
+
+                        <div class="col-2 col-lg-2 text-end">
+                            ${item['price']}
+                        </div>
+
+                        <div class="col-6 col-lg-2">
+                            <div class="input-group">
+                                <button type="button" class="btn btn-sm cart-item-substract btn-dark ratio-1x1 input-group-text" data-id="${itemId}"><i class="fa-solid fa-minus"></i></button>
+                                <input type="text" class="input-quantity form-control form-control-sm text-center bg-dark text-light" value="${item['quantity']}">
+                                <button type="button" class="btn btn-sm cart-item-add btn-dark ratio-1x1 input-group-text" data-id="${itemId}"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="col-2 col-lg-2 text-end">
+                            ${item['total']}
+                        </div>
+
+                        <div class="col-2 col-lg-1">
+                            <button class="btn btn-sm cart-item-delete btn-secondary float-end" data-id="${itemId}"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+
+                    </div>
+                    `
+
+                    cartContainer.append(newItem)
+
+                }
+
+                var totals = `
+
+                    <hr>
+
+                    <div class="row align-items-center mb-2">
+
+                        <div class="col-9 text-end">
+                            {% trans %}Total{% endtrans %}
+                        </div>
+
+                        <div class="col-2 text-end">
+                            ${json.totals['value']}
+                        </div>
+
+                        <div class="col-1"></div>
+
+                    </div>
+                `
+
+                cartContainer.append(totals)
+
+            }
+        }
+    })
+
+}
+
+$(document).ready(function() {
+
+    updateCart()
+
+    $(window).on("focus", function() {
+        
+        updateCart()
+
+    })
+
+    $(document).on("click", ".cart-item-delete", function() {
+
+        var itemId = $(this).data("id")
+
+        $.ajax({
+            method: "DELETE",
+            url: "/api/cart/delete",
+            data: {id: itemId},
+            success: function(response) {
+
+                var json = JSON.parse(JSON.stringify(response))
+                updateCart()
+
+            }
+        })
+    })
+
+    $(document).on("click", ".cart-item-substract", function() {
+        
+        var itemId = $(this).data("id")
+
+        $.ajax({
+            method: "PATCH",
+            url: "/api/cart/patch",
+            data: {id: itemId, quantity: -1},
+            success: function(response) {
+
+                var json = JSON.parse(JSON.stringify(response))
+                updateCart()
+
+            }
+        })
+
+    })
+
+    $(document).on("click", ".cart-item-add", function() {
+        
+        var itemId = $(this).data("id")
+
+        $.ajax({
+            method: "PATCH",
+            url: "/api/cart/patch",
+            data: {id: itemId, quantity: 1},
+            success: function(response) {
+
+                var json = JSON.parse(JSON.stringify(response))
+                updateCart()
+                
+            }
+        })
+
+    })
+
+})
+
+</script>

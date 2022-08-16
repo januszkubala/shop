@@ -9,6 +9,15 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class LoginController extends AbstractController
 {
+
+    #[Route('/test', name: 'app_test')]
+    public function test(AuthenticationUtils $authenticationUtils): Response
+    {
+
+        dd($date);
+        
+    }
+
     #[Route('/login', name: 'app_login')]
     public function index(AuthenticationUtils $authenticationUtils): Response
     {

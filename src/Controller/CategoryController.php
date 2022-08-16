@@ -24,7 +24,7 @@ class CategoryController extends AbstractController
 {
 
     #[Route('/category/pick', name: 'app_category_pick', methods: ['GET'])]
-    public function pick(EntityManagerInterface $entityManager, CategoryRepository $categoryRepository, Request $request): JsonResponse
+    public function pick(Request $request, EntityManagerInterface $entityManager, CategoryRepository $categoryRepository): JsonResponse
     {
 
         $parent = $request->query->get('parent');
@@ -46,7 +46,7 @@ class CategoryController extends AbstractController
     }
 
     #[Route('/category/path', name: 'app_category_path', methods: ['GET'])]
-    public function path(EntityManagerInterface $entityManager, Request $request): JsonResponse
+    public function path(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $id = $request->query->get('id');
         $repository = $entityManager->getRepository(Category::class);
@@ -67,7 +67,7 @@ class CategoryController extends AbstractController
     }
 
     #[Route('/category/properties', name: 'app_category_properties', methods: ['GET'])]
-    public function properties(EntityManagerInterface $entityManager, CategoryRepository $categoryRepository, PropertyRepository $propertyRepository, Request $request): JsonResponse
+    public function properties(Request $request, EntityManagerInterface $entityManager, CategoryRepository $categoryRepository, PropertyRepository $propertyRepository): JsonResponse
     {
         $id = (int) $request->query->get('id');
         $includeParents = (bool) $request->query->get('ip');
@@ -139,7 +139,7 @@ class CategoryController extends AbstractController
     }
 
     #[Route('/category/create', name: 'app_category_create')]
-    public function create(EntityManagerInterface $entityManager, CategoryRepository $categoryRepository, Request $request): Response
+    public function create(Request $request, EntityManagerInterface $entityManager, CategoryRepository $categoryRepository): Response
     {
 
         $category = new Category();

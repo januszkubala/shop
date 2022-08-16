@@ -1,0 +1,62 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Products{% endblock %}
+
+{% block body %}
+
+<div class="row">
+
+    <div class="col-xl-2">
+        {% trans %}Order{% endtrans %}
+    </div>
+
+    <div class="col-xl-2">
+        {% trans %}Customer{% endtrans %}
+    </div>
+
+    <div class="col-xl-2">
+        {% trans %}Items ordered{% endtrans %}
+    </div>
+
+    <div class="col-xl-2">
+        {% trans %}Date{% endtrans %}
+    </div>
+
+    <div class="col-xl-2">
+        {% trans %}Status{% endtrans %}
+    </div>
+
+</div>
+
+<hr>
+
+{% for order in orders %}
+
+<div class="row">
+
+    <div class="col-xl-2">
+        <a href="/dashboard/orders/order?id={{ order.id }}">{% trans %}Order no.{% endtrans %} {{ order.id }}</a>
+    </div>
+
+    <div class="col-xl-2">
+        {{ order.firstName }} {{ order.lastName }}
+    </div>
+
+    <div class="col-xl-2">
+        {{ order.quantity }}
+    </div>
+
+    <div class="col-xl-2">
+        {{ order.date | date('d.m.y H:i') }}
+    </div>
+
+    <div class="col-xl-2">
+        {% include 'chunks/order-status.html.twig' %}
+    </div>
+
+</div>
+
+{% endfor %}
+
+{% endblock %}

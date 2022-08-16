@@ -1,0 +1,116 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block body %}
+
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <h1>Checkout</h1>
+
+    <hr class="my-4">
+
+	<div class="row">
+
+		<div class="col-lg-4 align-self-end">
+
+		<div class="card bg-light">
+		<div class="card-body">
+
+			<form method="post" action="{{ path('app_order_create') }}" id="checkout-form">
+
+				<input type="hidden" name="paymentMethod" id="payment-method" value="stripe">
+				<input type="hidden" name="stripeToken" id="stripe-token" value="">
+
+                <label>{% trans %}Your credit or debit card{% endtrans %}</label>
+				<div id="card-element" class="form-control mt-1"></div>
+                <div class="form-text">Powered by Stripe</div>
+
+                <div class="text-center mt-3">
+                    <img src="{{ asset('img/icons/cards/visa.svg') }}" style="width:2rem">
+                    <img src="{{ asset('img/icons/cards/mastercard.svg') }}" style="width:2rem">
+                    <img src="{{ asset('img/icons/cards/amex.svg') }}" style="width:2rem">
+                    <img src="{{ asset('img/icons/cards/discover.svg') }}" style="width:2rem">
+                    <img src="{{ asset('img/icons/cards/diners.svg') }}" style="width:2rem">
+                </div>
+
+				<div class="mt-5">
+					<button id="pay-now" class="btn btn-sm btn-dark">{% trans %}Submit payment{% endtrans %}</button>
+				</div>
+
+			</form>
+
+		</div>
+		</div>
+
+		</div>
+
+	</div>
+
+<script>
+
+const stripePublishableKey = '{{ stripe.publishableKey }}'
+
+var stripe = Stripe(stripePublishableKey)
+
+var elements = stripe.elements()
+
+var style = {
+	base: {
+		color: "#32325d",
+		fontFamily: "sans-serif",
+		fontSmoothing: "antialiased",
+		fontSize: "15px",
+        padding: "20px",
+		"::placeholder": {
+			color: "#32325d"
+		}
+	},
+	invalid: {
+		fontFamily: "sans-serif",
+		color: "#fa755a",
+		iconColor: "#fa755a"
+	}
+}
+
+var card = elements.create("card", {
+	hidePostalCode: true,
+	style: style
+})
+
+card.mount("#card-element")
+
+$("#pay-now").on("click", function(e) {
+
+	e.preventDefault()
+
+	var button = $(this)
+
+	$(button).attr({disabled: true})
+
+	stripe.createToken(card).then(function(response) {
+
+		if(typeof response.error !== "undefined") {
+
+			$(button).attr({disabled: false})
+			
+			alert(response.error.message)
+		
+		}
+		
+		if(typeof response.token !== "undefined") {
+
+			$("#stripe-token").val(response.token.id)
+
+			$("#checkout-form").submit()
+
+		}
+
+	})
+
+})
+
+</script>
+
+{% endblock %}

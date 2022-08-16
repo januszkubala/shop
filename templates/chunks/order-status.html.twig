@@ -1,0 +1,15 @@
+{% if order.status == 'pending' %}
+    <span class="text-secondary">{% trans %}Pending / awaiting payment{% endtrans %}</span>
+{% elseif order.status == 'paid' %}
+    <span>{% trans %}Paid{% endtrans %}</span>
+{% elseif order.status == 'ready_to_ship' %}
+    <span class="text-warning">{% trans %}Ready to ship{% endtrans %}</span>
+{% elseif order.status == 'delivered' %}
+    <span class="text-success">{% trans %}Delivered{% endtrans %}</span>
+{% elseif order.status == 'cancelled' %}
+    <span class="text-danger">{% trans %}Cancelled{% endtrans %}</span>
+{% elseif order.status == 'disputed' %}
+    <span class="text-danger">{% trans %}Disputed{% endtrans %}</span>
+{% elseif order.status == 'refunded' %}
+    <span class="text-muted">{% trans %}Refunded{% endtrans %}</span>
+{% endif %}

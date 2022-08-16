@@ -1,0 +1,103 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}Order #{{ order.id }}{% endblock %}
+
+{% block sidemenu %}
+
+        <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/document/order-sheet/?id={{ order.id }}">{{ order.firstName }} {{ order.lastName }}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/orders/order?id={{ order.id }}">{% trans %}Return{% endtrans %}</a>
+        </div>
+
+<script>
+
+function getDocument(document, id) {
+
+    let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=1120,height=680,left=50,top=50`;
+
+    open('/document/' + document + '?id=' + id, '{% trans %}PDF Document{% endtrans %}', params);
+
+}
+
+</script>
+
+{% endblock %}
+
+
+{% block body %}
+
+    <h1>Payments</h1>
+    <hr>
+
+        <div class="row">
+        <div class="col-xl-5">
+
+            <h5>{% trans %}Customer{% endtrans %}</h5>
+
+            <b>{{ order.firstName }} {{ order.lastName }}</b><br>
+            {% set address = order %}
+            {% include 'chunks/address.html.twig' %}
+
+        </div>
+        <div class="col-xl-7">
+
+            <h5>{% trans %}Latest payment attempt{% endtrans %}</h5>
+            {% if payments|length > 0 %}
+
+                {% set payment = payments[0] %}
+                {% include 'chunks/payment.html.twig' %}
+
+            {% else %}
+
+                <p class="text-muted">{% trans %}No payment attempts were made for this order.{% endtrans %}</p>
+
+            {% endif %}
+
+        </div>
+        </div>
+
+        <hr>
+
+        <h5>{% trans %}Payments{% endtrans %}</h5>
+
+        <table class="table w-100">
+        <thead>
+        <tr class="bg-secondary text-light">
+            <th>{% trans %}Method{% endtrans %}</th>
+            <th>{% trans %}Card brand{% endtrans %}</th>
+            <th>{% trans %}Amount{% endtrans %}</th>
+            <th>{% trans %}Type{% endtrans %}</th>
+            <th>{% trans %}Date{% endtrans %}</th>
+            <th>{% trans %}Status{% endtrans %}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for payment in payments %}
+        <tr>
+        <tr>
+            <td>{{ payment.method }}</td>
+            {% if payment.cardBrand == 'visa' %}
+            <td>
+                <img src="{{ asset('img/icons/cards/visa.svg') }}" style="width:2rem">
+            </td>
+            {% endif %}
+            <td>{{ payment.amount }}</td>
+            <td>
+            {% if payment.isAutomatic == true %}
+            {% trans %}Automatic{% endtrans %}
+            {% else %}
+                {% trans %}Manual{% endtrans %}
+            {% endif %}
+            </td>
+            <td>{{ payment.date | date('d.m.y H:i') }}</td>
+            <td>{{ payment.status }}</td>
+
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </thead>
+        </table>
+
+{% endblock %}

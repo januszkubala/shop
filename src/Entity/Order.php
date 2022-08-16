@@ -2,43 +2,49 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
+use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
-#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+#[ORM\Entity(repositoryClass: OrderRepository::class)]
+#[ORM\Table(name: '`order`')]
+class Order
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180, unique: true)]
-    private ?string $email = null;
+    #[ORM\ManyToOne(inversedBy: 'orders')]
+    private ?User $user = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $ref = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 14, scale: 2)]
+    private ?string $net_amount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 14, scale: 2)]
+    private ?string $tax_amount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 14, scale: 2)]
+    private ?string $amount = null;
 
     #[ORM\Column]
-    private array $roles = [];
+    private ?int $quantity = null;
 
-    /**
-     * @var string The hashed password
-     */
-    #[ORM\Column]
-    private ?string $password = null;
+    #[ORM\OneToMany(mappedBy: 'parent', targetEntity: OrderComponent::class, orphanRemoval: true)]
+    private Collection $orderComponents;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Product::class)]
-    private Collection $products;
+    #[ORM\Column(length: 16)]
+    private ?string $status = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Order::class)]
-    private Collection $orders;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Payment::class)]
+    #[ORM\OneToMany(mappedBy: 'allocation', targetEntity: Payment::class)]
     private Collection $payments;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -65,13 +71,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $phone = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date_of_registration = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $email = null;
 
     public function __construct()
     {
-        $this->products = new ArrayCollection();
-        $this->orders = new ArrayCollection();
+        $this->orderComponents = new ArrayCollection();
         $this->payments = new ArrayCollection();
     }
 
@@ -80,127 +85,128 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    public function getEmail(): ?string
+    public function getUser(): ?User
     {
-        return $this->email;
+        return $this->user;
     }
 
-    public function setEmail(string $email): self
+    public function setUser(?User $user): self
     {
-        $this->email = $email;
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getRef(): ?string
+    {
+        return $this->ref;
+    }
+
+    public function setRef(string $ref): self
+    {
+        $this->ref = $ref;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): self
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    public function getNetAmount(): ?string
+    {
+        return $this->net_amount;
+    }
+
+    public function setNetAmount(string $net_amount): self
+    {
+        $this->net_amount = $net_amount;
+
+        return $this;
+    }
+
+    public function getTaxAmount(): ?string
+    {
+        return $this->tax_amount;
+    }
+
+    public function setTaxAmount(string $tax_amount): self
+    {
+        $this->tax_amount = $tax_amount;
+
+        return $this;
+    }
+
+    public function getAmount(): ?string
+    {
+        return $this->amount;
+    }
+
+    public function setAmount(string $amount): self
+    {
+        $this->amount = $amount;
+
+        return $this;
+    }
+
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): self
+    {
+        $this->quantity = $quantity;
 
         return $this;
     }
 
     /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
+     * @return Collection<int, OrderComponent>
      */
-    public function getUserIdentifier(): string
+    public function getOrderComponents(): Collection
     {
-        return (string) $this->email;
+        return $this->orderComponents;
     }
 
-    /**
-     * @see UserInterface
-     */
-    public function getRoles(): array
+    public function addOrderComponent(OrderComponent $orderComponent): self
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
-    }
-
-    public function setRoles(array $roles): self
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
-
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    /**
-     * @see UserInterface
-     */
-    public function eraseCredentials()
-    {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
-    }
-
-    /**
-     * @return Collection<int, Product>
-     */
-    public function getProducts(): Collection
-    {
-        return $this->products;
-    }
-
-    public function addProduct(Product $product): self
-    {
-        if (!$this->products->contains($product)) {
-            $this->products->add($product);
-            $product->setUser($this);
+        if (!$this->orderComponents->contains($orderComponent)) {
+            $this->orderComponents->add($orderComponent);
+            $orderComponent->setParent($this);
         }
 
         return $this;
     }
 
-    public function removeProduct(Product $product): self
+    public function removeOrderComponent(OrderComponent $orderComponent): self
     {
-        if ($this->products->removeElement($product)) {
+        if ($this->orderComponents->removeElement($orderComponent)) {
             // set the owning side to null (unless already changed)
-            if ($product->getUser() === $this) {
-                $product->setUser(null);
+            if ($orderComponent->getParent() === $this) {
+                $orderComponent->setParent(null);
             }
         }
 
         return $this;
     }
 
-    /**
-     * @return Collection<int, Order>
-     */
-    public function getOrders(): Collection
+    public function getStatus(): ?string
     {
-        return $this->orders;
+        return $this->status;
     }
 
-    public function addOrder(Order $order): self
+    public function setStatus(string $status): self
     {
-        if (!$this->orders->contains($order)) {
-            $this->orders->add($order);
-            $order->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeOrder(Order $order): self
-    {
-        if ($this->orders->removeElement($order)) {
-            // set the owning side to null (unless already changed)
-            if ($order->getUser() === $this) {
-                $order->setUser(null);
-            }
-        }
+        $this->status = $status;
 
         return $this;
     }
@@ -217,7 +223,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->payments->contains($payment)) {
             $this->payments->add($payment);
-            $payment->setUser($this);
+            $payment->setAllocation($this);
         }
 
         return $this;
@@ -227,8 +233,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->payments->removeElement($payment)) {
             // set the owning side to null (unless already changed)
-            if ($payment->getUser() === $this) {
-                $payment->setUser(null);
+            if ($payment->getAllocation() === $this) {
+                $payment->setAllocation(null);
             }
         }
 
@@ -331,15 +337,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getDateOfRegistration(): ?\DateTimeInterface
+    public function getEmail(): ?string
     {
-        return $this->date_of_registration;
+        return $this->email;
     }
 
-    public function setDateOfRegistration(\DateTimeInterface $date_of_registration): self
+    public function setEmail(?string $email): self
     {
-        $this->date_of_registration = $date_of_registration;
+        $this->email = $email;
 
         return $this;
     }
+
 }

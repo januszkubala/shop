@@ -1,0 +1,28 @@
+{% if payment.method == 'stripe' %}
+
+    <table class="table table-sm table-borderless">
+        <tr>
+            <td class="ps-0">{% trans %}Method{% endtrans %}</td>
+            <td colspan="2">Stripe</td>
+        </tr>
+        <tr>
+            <td class="ps-0">{% trans %}Amount{% endtrans %}</td>
+            <td colspan="2">{{ payment.amount }}</td>
+        </tr>
+
+        <tr>
+            <td class="ps-0">{% trans %}Card{% endtrans %}</td>
+            {% if payment.cardBrand == 'visa' %}
+            <td>
+                &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ payment.cardNumber }}
+                {{ payment.cardExpiryDate | date('m/y') }}
+            </td>
+            <td class="text-end">
+                <img src="{{ asset('img/icons/cards/visa.svg') }}" style="width:2rem">
+            </td>
+            {% endif %}
+        </tr>
+
+    </table>
+
+{% endif %}

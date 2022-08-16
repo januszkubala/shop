@@ -303,7 +303,7 @@ $(document).ready(function() {
 
         $(document).on("input", search, function() {
 
-            clearTimeout(timeout);
+            clearTimeout(timeout)
             timeout = setTimeout(() => {
                 
                 var query = search.val().trim()
@@ -313,10 +313,10 @@ $(document).ready(function() {
                         method: "GET",
                         url: "/product/search",
                         data: {query: query},
-                        success: function(json) {
+                        success: function(response) {
                             
                             searchResults.empty()
-                            json = JSON.parse(JSON.stringify(json))
+                            json = JSON.parse(JSON.stringify(response))
 
                             if(json.length === 0) {
                                 searchResults.hide()
@@ -363,7 +363,7 @@ $(document).ready(function() {
                 <div class="result-name">${productName}</div>
             </div>
             `
-            $("#product_parent").val(productId);
+            $("#product_parent").val(productId)
             productContainer.html(product)
 
             $.ajax({
