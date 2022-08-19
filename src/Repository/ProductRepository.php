@@ -86,6 +86,42 @@ class ProductRepository extends ServiceEntityRepository
         }
     }
 
+    public function findOneWithEntitiesBy($where) {
+
+        $queryBuilder = $this->createQueryBuilder('p')
+            ->addSelect('u')
+            ->addSelect('c')
+            ->addSelect('pr')
+            ->addSelect('s')
+            ->addSelect('pv')
+            ->addSelect('po')
+            ->leftJoin('p.user', 'u')
+            ->leftJoin('p.category', 'c')
+            ->leftJoin('p.price', 'pr')
+            ->leftJoin('p.stocks', 's')
+            ->leftJoin('p.propertyValues', 'pv')
+            ->leftJoin('pv.property', 'po')
+        ;
+        
+            foreach($where as $field => $value) {
+                $queryBuilder
+                    ->andWhere('p.' . $field . ' = :value')
+                    ->setParameter('value', $value)
+                ;
+            }
+
+            $queryBuilder
+                ->orderBy('pr.date', 'DESC')
+            ;
+
+            return $queryBuilder
+                ->getQuery()
+                ->getOneOrNullResult()
+            ;
+        ;
+
+    }
+
 
 //    /**
 //     * @return Product[] Returns an array of Product objects

@@ -72,7 +72,7 @@ class StripeController extends AbstractController
         $payment->setCardNumber($paymentMethod->last4);
         $payment->setMethod('stripe');
         $payment->setStatus($paymentConfirmation->status);
-        $payment->setIsAutomatic(false);
+        $payment->setIsAutomatic(true);
         $payment->setDate(new \DateTime());
         
         $response = new Response();

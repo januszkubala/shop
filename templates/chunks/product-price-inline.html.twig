@@ -1,0 +1,30 @@
+{% if price != null %}
+
+
+    {% set grossPrice = price.price + price.price * price.tax.rate %}
+
+    <b>{{ grossPrice | format_currency(configuration.currency, locale = configuration.locale) }}</b>
+
+    {% if price.previousPrice != null %}
+
+        {% set previousPrice = price.previousPrice + price.previousPrice * price.tax.rate %}
+        <span class="badge rounded-pill text-bg-danger">{% trans %}Was{% endtrans %} {{ previousPrice | format_currency(configuration.currency, locale = configuration.locale) }}</span>
+
+        {% if price.dateValidFrom != null or price.dateValidTo != null %}
+            <div class="mt-2">
+            {% if price.dateValidFrom != null %}
+                <b>{% trans %}Valid from{% endtrans %}</b> {{ price.dateValidFrom | date('y.m.d H:i') }}
+            {% endif %}
+            
+            {% if price.dateValidTo != null %}
+                <b>{% trans %}Valid to{% endtrans %}</b> {{ price.dateValidTo | date('y.m.d H:i') }}
+            {% endif %}
+            </div>
+
+        {% endif %}
+
+    {% endif %}
+
+    {#{ price.price + price.price * price.tax.rate | format_currency(configuration.currency, locale = configuration.locale) }#}
+
+{% endif %}

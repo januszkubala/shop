@@ -1,0 +1,6 @@
+{{ address.street }}<br>
+{{ address.city }} {{ address.postalCode }}<br>
+{% if address.region != null %}
+    {{ address.region }}<br>
+{% endif %}
+{{ countries[address.country] }} ({{ address.country }})

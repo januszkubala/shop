@@ -1,0 +1,39 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}Settings{% endblock %}
+
+
+{% block sidemenu %}
+
+    <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+        <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard">{% trans %}Return{% endtrans %}</a>
+    </div>
+
+{% endblock %}
+
+
+{% block body %}
+
+<h1>{% trans %}Files manager{% endtrans %}</h1>
+<hr>
+
+<div class="my-4">
+
+    <input type="file" name="file" id="file" class="d-none">
+
+    <div class="upload-area card bg-secondary bg-opacity-10 p-5 text-secondary" id="upload-file">
+
+        <div class="upload-trigger text-center my-5">
+            <p><b class="fs-6"><i class="fa-solid fa-cloud-arrow-up fa-4x"></i><br>{% trans %}Drag and drop files here{% endtrans %}</b></p>
+            <div class="mt-3">
+            <label class="btn btn-secondary btn-sm small">{% trans %}or select files to upload{% endtrans %}</label>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

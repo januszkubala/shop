@@ -50,12 +50,12 @@ class OrderController extends AbstractController
 
             foreach($cart['items'] as $itemId => $item) {
 
-                $quantity = (int) $item['quantity'];
+                $itemQuantity = (int) $item['quantity'];
 
                 $product = $entityManager->getRepository(Product::class)->findOneBy(['id' => $itemId]);
                 $price = $priceRepository->findCurrentPrice($product);
 
-                if($product->getStock() >= $quantity) {
+                if($product->getStock() >= $itemQuantity) {
                     
                     $tax = $price->getTax();
 
@@ -66,7 +66,7 @@ class OrderController extends AbstractController
                     $orderComponent->setProduct($product);
                     $orderComponent->setNetPrice($price->getPrice());
                     $orderComponent->setPrice(number_format($price->getPrice() + $price->getPrice() * $tax->getRate(), 2, '.', ''));
-                    $orderComponent->setQuantity($quantity);
+                    $orderComponent->setQuantity($itemQuantity);
                     $orderComponent->setTaxRate($tax->getRate());
                     $orderComponent->setTaxName($tax->getName());
                     $orderComponent->setNetAmount(number_format($orderComponent->getNetPrice() * $orderComponent->getQuantity(), 2, '.', ''));

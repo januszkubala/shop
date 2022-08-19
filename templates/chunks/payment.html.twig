@@ -7,18 +7,67 @@
         </tr>
         <tr>
             <td class="ps-0">{% trans %}Amount{% endtrans %}</td>
-            <td colspan="2">{{ payment.amount }}</td>
+            <td colspan="2">{{ payment.amount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
         </tr>
 
         <tr>
             <td class="ps-0">{% trans %}Card{% endtrans %}</td>
+
             {% if payment.cardBrand == 'visa' %}
             <td>
                 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ payment.cardNumber }}
                 {{ payment.cardExpiryDate | date('m/y') }}
             </td>
             <td class="text-end">
-                <img src="{{ asset('img/icons/cards/visa.svg') }}" style="width:2rem">
+                <img src="{{ asset('img/icons/cards/visa.svg') }}" alt="Visa" style="width:2rem">
+            </td>
+            {% elseif payment.cardBrand == 'mastercard' %}
+            <td>
+                &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ payment.cardNumber }}
+                {{ payment.cardExpiryDate | date('m/y') }}
+            </td>
+            <td class="text-end">
+                <img src="{{ asset('img/icons/cards/mastercard.svg') }}" alt="Mastercard" style="width:2rem">
+            </td>
+            {% elseif payment.cardBrand == 'amex' %}
+            <td>
+                &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ payment.cardNumber }}
+                {{ payment.cardExpiryDate | date('m/y') }}
+            </td>
+            <td class="text-end">
+                <img src="{{ asset('img/icons/cards/amex.svg') }}" alt="American Express" style="width:2rem">
+            </td>
+            {% elseif payment.cardBrand == 'discover' %}
+            <td>
+                &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ payment.cardNumber }}
+                {{ payment.cardExpiryDate | date('m/y') }}
+            </td>
+            <td class="text-end">
+                <img src="{{ asset('img/icons/cards/discover.svg') }}" alt="Discover" style="width:2rem">
+            </td>
+            {% elseif payment.cardBrand == 'diners' %}
+            <td>
+                &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ payment.cardNumber }}
+                {{ payment.cardExpiryDate | date('m/y') }}
+            </td>
+            <td class="text-end">
+                <img src="{{ asset('img/icons/cards/diners.svg') }}" alt="Diners Club" style="width:2rem">
+            </td>
+            {% elseif payment.cardBrand == 'jcb' %}
+            <td>
+                &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ payment.cardNumber }}
+                {{ payment.cardExpiryDate | date('m/y') }}
+            </td>
+            <td class="text-end">
+                <img src="{{ asset('img/icons/cards/jcb.svg') }}" alt="JCB" style="width:2rem">
+            </td>
+            {% elseif payment.cardBrand == 'unionpay' %}
+            <td>
+                &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ payment.cardNumber }}
+                {{ payment.cardExpiryDate | date('m/y') }}
+            </td>
+            <td class="text-end">
+                <img src="{{ asset('img/icons/cards/unionpay.svg') }}" alt="UnionPay" style="width:2rem">
             </td>
             {% endif %}
         </tr>

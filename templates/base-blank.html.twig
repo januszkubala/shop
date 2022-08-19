@@ -21,19 +21,11 @@
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js" integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         {% endblock %}
     </head>
-    <body class="bg-light">
+    <body class="bg-light p-5">
 
     {% set current_path = app.request.get('_route') %}
     
-    <div class="container my-4 rounded bg-white">
-        <div class="row">
-        <div class="col-10 p-5 rounded">
         {% block body %}{% endblock %}
-        </div>
-        <div class="col-2 p-0 rounded bg-secondary">
-        {% block sidemenu %}{% endblock %}
-        </div>
-        </div>
-    </div>
+
     </body>
 </html>

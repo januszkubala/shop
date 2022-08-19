@@ -10,61 +10,55 @@
         <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard">{% trans %}Return{% endtrans %}</a>
     </div>
 
+<script>
+
+function getDocument(document, id) {
+
+    let params = "scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=1120,height=680,left=50,top=50"
+
+    open("/document/" + document + "?id=" + id, "{% trans %}PDF Document{% endtrans %}", params)
+
+}
+
+$("table.table-hover").on("click", "[data-href]", function() {
+
+    var href = $(this).data("href")
+
+    if(href != null) {
+        window.location.href = href
+    }
+    
+})
+
+</script>
+
 {% endblock %}
 
 
 {% block body %}
 
-<div class="row">
+<table class="table table-striped w-100 table-hover">
+<thead>
+<tr class="bg-success text-light">
+    <th>{% trans %}Name{% endtrans %}</th>
+    <th>{% trans %}Date of registration{% endtrans %}</th>
+    <th>{% trans %}Country{% endtrans %}</th>
+    <th>{% trans %}Email{% endtrans %}</th>
+    <th>{% trans %}Phone{% endtrans %}</th>
+</tr>
+</thead>
 
-    <div class="col-xl-4 py-2 bg-dark text-light">
-        {% trans %}Name{% endtrans %}
-    </div>
-
-    <div class="col-xl-2 py-2 bg-dark text-light">
-        {% trans %}Date of registration{% endtrans %}
-    </div>
-
-    <div class="col-xl-2 py-2 bg-dark text-light">
-        {% trans %}Country{% endtrans %}
-    </div>
-
-    <div class="col-xl-2 py-2 bg-dark text-light">
-        {% trans %}Email{% endtrans %}
-    </div>
-
-    <div class="col-xl-2 py-2 bg-dark text-light">
-        {% trans %}Phone{% endtrans %}
-    </div>
-
-</div>
-
+<tbody>
 {% for user in users %}
-
-<div class="row border-bottom">
-
-    <div class="col-xl-4 py-2">
-        <a href="/dashboard/users/user?id={{ user.id }}" class="text-danger">{{ user.lastName }} {{ user.firstName }}</a>
-    </div>
-
-    <div class="col-xl-2 py-2">
-        {{ user.dateOfRegistration | date('d.m.Y') }}
-    </div>
-
-    <div class="col-xl-2 py-2">
-        {{ countries[user.country] }}
-    </div>
-
-    <div class="col-xl-2 py-2">
-        {{ user.email }}
-    </div>
-
-    <div class="col-xl-2 py-2">
-        {{ user.phone }}
-    </div>
-
-</div>
-
+<tr data-href="/dashboard/users/user/{{ user.id }}">
+    <th>{{ user.lastName }} {{ user.firstName }}</th>
+    <td>{{ user.dateOfRegistration | date('d.m.Y') }}</td>
+    <td>{{ countries[user.country] }}</td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.phone }}</td>
+</tr>
 {% endfor %}
+</tbody>
+</table>
 
 {% endblock %}

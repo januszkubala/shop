@@ -7,7 +7,7 @@
 
         <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
             <a class="btn btn-dark btn-sm p-2 text-start" href="/document/order-sheet/?id={{ order.id }}">{{ order.firstName }} {{ order.lastName }}</a>
-            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/orders/order?id={{ order.id }}">{% trans %}Return{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/orders/order/{{ order.id }}">{% trans %}Return{% endtrans %}</a>
         </div>
 
 <script>
@@ -61,9 +61,9 @@ function getDocument(document, id) {
 
         <h5>{% trans %}Payments{% endtrans %}</h5>
 
-        <table class="table w-100">
+        <table class="table w-100 table-striped">
         <thead>
-        <tr class="bg-secondary text-light">
+        <tr class="bg-success text-light">
             <th>{% trans %}Method{% endtrans %}</th>
             <th>{% trans %}Card brand{% endtrans %}</th>
             <th>{% trans %}Amount{% endtrans %}</th>
@@ -77,12 +77,10 @@ function getDocument(document, id) {
         <tr>
         <tr>
             <td>{{ payment.method }}</td>
-            {% if payment.cardBrand == 'visa' %}
             <td>
-                <img src="{{ asset('img/icons/cards/visa.svg') }}" style="width:2rem">
+                <img src="{{ asset('img/icons/cards/' ~ payment.cardBrand ~ '.svg') }}" style="width:2rem">
             </td>
-            {% endif %}
-            <td>{{ payment.amount }}</td>
+            <td>{{ payment.amount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
             <td>
             {% if payment.isAutomatic == true %}
             {% trans %}Automatic{% endtrans %}

@@ -3,7 +3,7 @@
         {% if price.previousPrice is not null %}
         <del class="previous-price">&nbsp;{{ (price.previousPrice + price.previousPrice * price.tax.rate)|round(2) }}&nbsp;</del>
         {% endif %}
-        {{ ((price.price + price.price * price.tax.rate)|round(2))|split('.', 2)[0] }}<span class="decimal">.{{ ((price.price + price.price * price.tax.rate)|round(2))|split('.', 2)[1] }}</span>
+        {{ ((price.price + price.price * price.tax.rate)|number_format(2, '.', ''))|split('.', 2)[0] }}<span class="decimal">.{{ ((price.price + price.price * price.tax.rate)|number_format(2, '.', ''))|split('.', 2)[1] }}</span>
         
         {% if price.description is not null %}
         <div class="price-description mt-2">

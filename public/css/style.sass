@@ -1,21 +1,30 @@
-@import url("https://use.typekit.net/xbb1wxh.css")
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap')
 @import url("https://fonts.googleapis.com/css2?family=Dosis:wght@400;700&display=swap")
 
 body
     font-size: 85% !important
 
 h1, h2, h3, h4, h5, h6
-    font-family: alegreya-sans
-    font-weight: 800
-
+    font-family: Montserrat
+    font-weight: 700
+h2, h3, h4, h5, h6
+    font-weight: 600
+b
+    font-weight: 600
+label
+    font-weight: 600
 .form-control, .form-select
     font-size: .85rem
     padding: .375rem
-
 .modal
     .card
         padding: .375rem
-
+.table
+    th
+        font-weight: 600
+    &.table-hover
+        tbody
+            cursor: pointer
 .price-box
     .price
         font-family: dosis
@@ -46,3 +55,7 @@ h1, h2, h3, h4, h5, h6
                     text-align: right
                 .label
                     font-size: .7rem
+.upload-area
+    border-width: 4px
+    border-style: dashed
+    border-color: rgba(108, 117, 125, .25)

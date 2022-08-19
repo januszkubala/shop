@@ -122,8 +122,6 @@ class CategoryController extends AbstractController
 
         }
 
-        //dd($properties);
-
         $encoder = new JsonEncoder();
         $defaultContext = [
             AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object, $format, $context) {

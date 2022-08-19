@@ -1,0 +1,26 @@
+{% extends 'base-blank.html.twig' %}
+
+{% block title %}{% trans %}Exporting to Excel{% endtrans %}{% endblock %}
+
+{% block body %}
+
+    <h1>
+    {% trans %}Preparing the file{% endtrans %}
+    <img src="{{ asset('img/icons/xlsx.svg') }}" style="height:4em" class="float-end" alt="{% trans %}Excel{% endtrans %}">
+    </h1>
+
+    <hr>
+    <p class="mt-0 mb-1">{% trans %}The system is currently preparing XLSX spreadsheet. Your download should begin within few seconds.{% endtrans %}</p>
+    <p class="mt-0">{% trans with {'%link_open%': '<a href="?file=true">', '%link_close%': '</a>'} %}If the download will not start automatically %link_open%click here%link_close%.{% endtrans %}</p>
+
+<script>
+
+setTimeout(function() {
+
+    window.opener.redirectToFile(window, "{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}/?file=true")
+
+}, 3000)
+
+</script>
+
+{% endblock %}

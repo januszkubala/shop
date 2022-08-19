@@ -39,12 +39,85 @@ class OrderRepository extends ServiceEntityRepository
         }
     }
 
-
     public function findAllOrders(): array
     {
 
         return $queryBuilder = $this->createQueryBuilder('o')
             ->orderBy('o.id', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+
+    }
+
+
+    public function findFilteredOrders($filters): array
+    {
+
+        $queryBuilder = $this->createQueryBuilder('o');
+
+        if($filters['query'] != null) {
+
+            $queryKeywords = explode(' ', $filters['query']);
+            $keywords = [];
+    
+            foreach($queryKeywords as $keyword) {
+                if(strlen(trim($keyword)) > 2) {
+                    $keywords[] = trim($keyword);
+                }
+            }
+
+            if(count($keywords) > 0){
+    
+                $i = 0;
+                foreach ($keywords as $keyword) {
+                    if($i == 0){
+                        $queryBuilder
+                            ->andWhere('o.first_name LIKE :keyword_' . $i . ' OR o.last_name LIKE :keyword_' . $i);
+                    }
+                    else{
+                        $queryBuilder
+                            ->orWhere('o.first_name LIKE :keyword_' . $i . ' OR o.last_name LIKE :keyword_' . $i);
+                    }
+                    $queryBuilder
+                        ->setParameter(':keyword_' . $i, '%' . $keyword . '%');
+                    $i++;
+                }
+            }
+        }
+
+        if($filters['grossValueBetween'] != null || $filters['grossValueAnd'] != null) {
+            if($filters['grossValueBetween'] != null) {
+                $queryBuilder
+                    ->andWhere('o.amount >= :value_between')
+                    ->setParameter('value_between', $filters['grossValueBetween'])
+                ;
+            }
+            if($filters['grossValueAnd'] != null) {
+                $queryBuilder
+                    ->andWhere('o.amount <= :value_and')
+                    ->setParameter('value_and', $filters['grossValueAnd'])
+                ;
+            }
+        }
+
+        if($filters['dateBetween'] != null || $filters['dateAnd']) {
+            if($filters['dateBetween'] != null) {
+
+                $queryBuilder
+                    ->andWhere('o.date >= :date_between')
+                    ->setParameter('date_between', $filters['dateBetween']->format('Y-m-d 00:00:00'))
+                ;
+            }
+            if($filters['dateAnd'] != null) {
+                $queryBuilder
+                    ->andWhere('o.date <= :date_and')
+                    ->setParameter('date_and', $filters['dateAnd']->format('Y-m-d 23:59:59'))
+                ;
+            }
+        }
+
+        return $queryBuilder
             ->getQuery()
             ->getResult()
         ;

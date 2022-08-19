@@ -1,0 +1,166 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}{% trans %}Prices{% endtrans %} | {{ product.name }}{% endblock %}
+
+{% block sidemenu %}
+
+        <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+            <a class="btn btn-dark btn-sm p-2 text-start" href="javascript:void(0)" onclick="getExcel('prices-spreadsheet', {{ product.id }})">
+                {% trans %}Export to Excel{% endtrans %}
+                <i class="fa-solid fa-file-excel float-end fa-fw mt-1"></i>
+            </a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="javascript:void(0)" onclick="getDocument('product-sheet', {{ product.id }})">
+                {% trans %}Product sheet{% endtrans %}
+                <i class="fa-solid fa-file-pdf float-end fa-fw mt-1"></i>
+            </a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/prices/add">{% trans %}Add price{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/stocks">{% trans %}Stock{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}">{% trans %}Return{% endtrans %}</a>
+        </div>
+
+<script>
+
+function redirectToFile(downloadWindow, url) {
+
+    downloadWindow.close()
+
+    window.location.href = url
+
+}
+
+function getExcel(document, id) {
+    
+    var downloadWindow
+
+    let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=620,height=400,left=50,top=50`
+
+    downloadWindow = window.open('/document/' + document + '/' + id, '{% trans %}Excel Spreadsheet{% endtrans %}', params)
+
+}
+
+function getDocument(document, id) {
+
+    let params = "scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=1120,height=680,left=50,top=50"
+
+    open("/document/" + document + "?id=" + id, "{% trans %}PDF Document{% endtrans %}", params)
+
+}
+
+$("table.table-hover").on("click", "[data-href]", function() {
+
+    var href = $(this).data("href")
+
+    if(href != null) {
+        window.location.href = href
+    }
+    
+})
+
+</script>
+
+{% endblock %}
+
+
+{% block body %}
+
+    <h1 class="me-0">{% trans %}Prices{% endtrans %}</h1>
+    <h5 class="ms-0">{{ product.name }}</h5>
+    <hr>
+
+        <div class="row">
+        <div class="col-xl-4">
+
+            <h5>{% trans %}Current price{% endtrans %}</h5>
+
+            {% include '/chunks/product-price-inline.html.twig' %}
+            <br>
+            {% trans %}Date entered{% endtrans %} <b>{{ price.date | date('d.m.Y') }}</b>
+
+        </div>
+        <div class="col-xl-4">
+        
+            <h5>{% trans %}Tax{% endtrans %}</h5>
+
+            {% if price.tax != null %}
+
+                <table class="table table-sm">
+                <tbody>
+                    <tr>
+                        <th class="ps-0">{% trans %}Tax name{% endtrans %}</th>
+                        <td>{{ price.tax.name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0">{% trans %}Tax rate{% endtrans %}</th>
+                        <td>{{ price.tax.rate * 100 }}%</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0">{% trans %}Value in this product{% endtrans %}</th>
+                        {% set productTaxValue = price.price * price.tax.rate %}
+                        <td>{{ productTaxValue | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+                    </tr>
+                </tbody>
+                </table>
+
+            {% endif %}
+
+        </div>
+        </div>
+
+        <hr>
+
+        <h5>{% trans %}Prices associated{% endtrans %}</h5>
+
+        <table class="table table-striped w-100 table-hover">
+        <thead>
+        <tr class="bg-success text-light">
+            <th>{% trans %}Date entered{% endtrans %}</th>
+            <th>{% trans %}Price{% endtrans %}</th>
+            <th>{% trans %}Price before{% endtrans %}</th>
+            <th>{% trans %}Tax{% endtrans %}</th>
+            <th>{% trans %}Gross price{% endtrans %}</th>
+            <th>{% trans %}Gross price before{% endtrans %}</th>
+            <th>{% trans %}Valid from{% endtrans %}</th>
+            <th>{% trans %}Valid to{% endtrans %}</th>
+            <th>{% trans %}Description{% endtrans %}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for price in product.price %}
+        <tr data-href="/dashboard/products/product/{{ product.id }}/prices/{{ price.id }}/edit">
+            <td>{{ price.date | date('d.m.Y') }}</td>
+            <td>{{ price.price | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+            <td>
+            {% if price.previousPrice != null %}
+            {{ price.previousPrice | format_currency(configuration.currency, locale = configuration.locale) }}
+            {% endif %}
+            </td>
+            <td>{{ price.tax.rate * 100 }}%</td>
+            <td>
+            {% set grossPrice = price.price + price.price * price.tax.rate %}
+            {{ grossPrice | format_currency(configuration.currency, locale = configuration.locale) }}
+            </td>
+            <td>
+            {% if price.previousPrice != null %}
+                {% set previousPrice = price.previousPrice + price.previousPrice * price.tax.rate %}
+                {{ previousPrice | format_currency(configuration.currency, locale = configuration.locale) }}
+            {% endif %}
+            </td>
+            <td>
+            {% if price.dateValidFrom != null %}
+                {{ price.dateValidFrom | date('d.m.y H:i') }}
+            {% endif %}
+            </td>
+            <td>
+            {% if price.dateValidTo != null %}
+                {{ price.dateValidTo | date('d.m.y H:i') }}
+            {% endif %}
+            </td>
+            <td>{{ price.description }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </thead>
+        </table>
+
+{% endblock %}

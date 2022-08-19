@@ -1,15 +1,15 @@
 
 {% extends 'base-dashboard.html.twig' %}
 
-{% block title %}Order #{{ order.id }}{% endblock %}
+{% block title %}Order {{ order.id }}{% endblock %}
 
 {% block sidemenu %}
 
         <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
-            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/users/user?id={{ order.id }}">{{ order.firstName }} {{ order.lastName }}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/users/user?id={{ order.user.id }}">{{ order.firstName }} {{ order.lastName }}</a>
             <a class="btn btn-dark btn-sm p-2 text-start" href="javascript:void()" onclick="getDocument('order-sheet', {{ order.id }})">
                 {% trans %}Order sheet{% endtrans %}
-                <i class="fa-solid fa-file-pdf float-end fa-fw"></i>
+                <i class="fa-solid fa-file-pdf float-end fa-fw mt-1"></i>
             </a>
             <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/orders/order/{{ order.id }}/payments">
                 Payments
@@ -29,11 +29,21 @@
 
 function getDocument(document, id) {
 
-    let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=1120,height=680,left=50,top=50`;
+    let params = "scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=1120,height=680,left=50,top=50"
 
-    open('/document/' + document + '?id=' + id, '{% trans %}PDF Document{% endtrans %}', params);
+    open("/document/" + document + "?id=" + id, "{% trans %}PDF Document{% endtrans %}", params)
 
 }
+
+$("table.table-hover").on("click", "[data-href]", function() {
+
+    var href = $(this).data("href")
+
+    if(href != null) {
+        window.location.href = href
+    }
+    
+})
 
 </script>
 
@@ -50,38 +60,38 @@ function getDocument(document, id) {
 
             <h5>{% trans %}Order information{% endtrans %}</h5>
 
-            <table class="table table-sm border-start">
+            <table class="table table-sm">
             <tbody>
             <tr>
-                <td class="bg-light">{% trans %}Date{% endtrans %}</td>
+                <td class="ps-0">{% trans %}Date{% endtrans %}</td>
                 <td>{{ order.date | date('d.m.y H:i') }}</td>
             </tr>
             <tr>
-                <td class="bg-light">{% trans %}Order number{% endtrans %}</td>
+                <td class="ps-0">{% trans %}Order number{% endtrans %}</td>
                 <td>{{ order.id }}</td>
             </tr>
             <tr>
-                <td class="bg-light">{% trans %}Current status{% endtrans %}</td>
+                <td class="ps-0">{% trans %}Current status{% endtrans %}</td>
                 <td>{% include 'chunks/order-status.html.twig' %}</td>
             </tr>
             <tr>
-                <td class="bg-light">{% trans %}Net value{% endtrans %}</td>
-                <td>{{ order.netAmount }}</td>
+                <td class="ps-0">{% trans %}Net value{% endtrans %}</td>
+                <td>{{ order.netAmount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
             </tr>
             <tr>
-                <td class="bg-light">{% trans %}Taxes{% endtrans %}</td>
-                <td>{{ order.taxAmount }}</td>
+                <td class="ps-0">{% trans %}Taxes{% endtrans %}</td>
+                <td>{{ order.taxAmount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
             </tr>
             <tr>
-                <td class="bg-light">{% trans %}Gross value{% endtrans %}</td>
-                <td>{{ order.amount }}</td>
+                <td class="ps-0">{% trans %}Gross value{% endtrans %}</td>
+                <td>{{ order.amount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
             </tr>
             <tr>
-                <td class="bg-light">{% trans %}Items ordered{% endtrans %}</td>
+                <td class="ps-0">{% trans %}Items ordered{% endtrans %}</td>
                 <td>{{ order.quantity }}</td>
             </tr>
             <tr>
-                <td class="bg-light">{% trans %}Reference{% endtrans %}</td>
+                <td class="ps-0">{% trans %}Reference{% endtrans %}</td>
                 <td class="text-uppercase small">{{ order.ref }}</td>
             </tr>
             </table>
@@ -116,9 +126,9 @@ function getDocument(document, id) {
 
         <h5>{% trans %}Items in this order{% endtrans %}</h5>
 
-        <table class="table w-100">
+        <table class="table w-100 table-striped table-hover">
         <thead>
-        <tr class="bg-secondary text-light">
+        <tr class="bg-success text-light">
             <th>{% trans %}Product{% endtrans %}</th>
             <th>{% trans %}SKU{% endtrans %}</th>
             <th>{% trans %}Product code{% endtrans %}</th>
@@ -131,8 +141,8 @@ function getDocument(document, id) {
         </thead>
         <tbody>
         {% for component in components %}
-        <tr class="small">
-            <td><a href="/dashboard/products/product/{{ component.product.id }}">{{ component.name }}</a></td>
+        <tr data-href="/dashboard/products/product/{{ component.product.id }}">
+            <th>{{ component.name }}</th>
             <td>{{ component.sku }}</td>
             <td>
             {% if component.ean != null %}

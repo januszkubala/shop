@@ -122,7 +122,7 @@ class ProductController extends AbstractController
 
             $tax = $entityManager->getRepository(Tax::class)->findOneById(['tax' => $request->get('product')['tax']]);
 
-            $price->setValue($priceValue);
+            $price->setPrice($priceValue);
             $price->setProduct($product);
             $price->setDate($date);
             $price->setTax($tax);

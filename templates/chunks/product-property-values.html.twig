@@ -1,0 +1,15 @@
+{% for property in properties %}
+    <tr>
+    <th class="ps-0">{{ property.property.name }}</th>
+    <td>
+    {% if property.text != null %}
+        {{ property.text }}
+    {% elseif property.floatingPointNumber != null   %}
+        {{ property.floatingPointNumber }}{% if property.unit != null %}{{ property.unit }}{% endif %}
+    {% elseif property.number != null %}
+        {{ property.number }}{% if property.unit != null %}{{ property.unit }}{% endif %}
+    {% endif %}
+    
+    </td>
+    </tr>
+{% endfor %}

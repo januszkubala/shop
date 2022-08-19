@@ -6,6 +6,8 @@ use App\Entity\Product;
 use App\Entity\Tax;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormEvent;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\RadioType;
@@ -91,6 +93,37 @@ class ProductType extends AbstractType
                 'label' => 'Save product'
             ])
         ;
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+            
+            $product = $event->getData();
+            $form = $event->getForm();
+
+
+            if($product->getParent() != null) {
+
+                $form
+                    ->add('assignment', ChoiceType::class, [
+                        'mapped' => false,
+                        'choices' => [
+                            'Assign to category' => 'category',
+                            'Assign to parent product' => 'parent'
+                        ],
+                        'data' => 'parent',
+                        'expanded' => true,
+                        'help' => 'This product will inherit category from its parent if \'Assign to parent product\' is chosen.'
+                    ]);
+
+            }
+
+            //$event->setData($product);
+
+
+        });
+
+
+
+        
     }
 
     public function configureOptions(OptionsResolver $resolver): void

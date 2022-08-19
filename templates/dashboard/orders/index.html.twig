@@ -1,62 +1,179 @@
 
-{% extends 'base.html.twig' %}
+{% extends 'base-dashboard.html.twig' %}
 
 {% block title %}Products{% endblock %}
 
+{% block filters %}
+
+    <div class="card border-0 bg-secondary rounded bg-opacity-10 mb-5">
+
+        <h6 class="text-uppercase bg-dark text-light rounded p-2">{% trans %}Filters{% endtrans %}</h6>
+
+        <div class="card-body">
+
+            {{ form_start(filtersForm) }}
+
+            <div class="row">
+
+                <div class="col-4">
+
+                    <label>&nbsp;</label>
+                    {{ form_widget(filtersForm.query, {attr: {class: 'form-control'}}) }}
+                    
+                    {% if filtersForm.query.vars.help is not null %}
+                    <div class="form-text">
+                        {{ form_help(filtersForm.query) }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-4">
+
+                    {{ form_label(filtersForm.grossValueBetween) }}
+
+                    <div class="row">
+                        <div class="col-6">
+                            {{ form_widget(filtersForm.grossValueBetween, {attr: {class: 'form-control'}}) }}
+                        </div>
+                        <div class="col-6">
+                            {{ form_widget(filtersForm.grossValueAnd, {attr: {class: 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    {% if filtersForm.grossValueBetween.vars.help is not null %}
+                    <div class="form-text">
+                        {{ form_help(filtersForm.grossValueBetween) }}
+                    </div>
+                    {% endif %}
+
+                </div>
+
+                <div class="col-4">
+
+                    {{ form_label(filtersForm.dateBetween) }}
+
+                    <div class="row">
+                        <div class="col-6">
+                            {{ form_widget(filtersForm.dateBetween, {attr: {class: 'form-control'}}) }}
+                        </div>
+                        <div class="col-6">
+                            {{ form_widget(filtersForm.dateAnd, {attr: {class: 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    {% if filtersForm.dateBetween.vars.help is not null %}
+                    <div class="form-text">
+                        {{ form_help(filtersForm.dateBetween) }}
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="my-3 text-end">
+
+                <a href="/dashboard/orders?filters=reset" class="me-3 text-decoration-none"><i class="fa-solid fa-times"></i> {% trans %}Reset filters{% endtrans %}</a>
+
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-filter"></i> {% trans %}Filter results{% endtrans %}</button>
+                {% do filtersForm.submit.setRendered %}
+
+                <div class="form-text">
+                    {% trans %}Current filters will be applied while exporting to Excel as well.{% endtrans %}
+                </div>
+
+            </div>
+
+            {{ form_end(filtersForm) }}
+
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block sidemenu %}
+
+    <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+        <a class="btn btn-dark btn-sm p-2 text-start" href="javascript:void(0)" onclick="getExcel('orders-spreadsheet')">
+            {% trans %}Export to Excel{% endtrans %}
+            <i class="fa-solid fa-file-excel float-end fa-fw mt-1"></i>
+        </a>
+        <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard">{% trans %}Return{% endtrans %}</a>
+    </div>
+
+<script>
+
+function redirectToFile(downloadWindow, url) {
+
+    downloadWindow.close()
+
+    window.location.href = url
+
+}
+
+function getExcel(document) {
+
+    var downloadWindow
+
+    let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=620,height=400,left=50,top=50`
+
+    downloadWindow = window.open('/document/' + document, '{% trans %}Excel Spreadsheet{% endtrans %}', params)
+
+}
+
+$("table.table-hover").on("click", "[data-href]", function() {
+
+    var href = $(this).data("href")
+
+    if(href != null) {
+        window.location.href = href
+    }
+
+})
+
+</script>
+
+{% endblock %}
+
+
 {% block body %}
 
-<div class="row">
-
-    <div class="col-xl-2">
-        {% trans %}Order{% endtrans %}
-    </div>
-
-    <div class="col-xl-2">
-        {% trans %}Customer{% endtrans %}
-    </div>
-
-    <div class="col-xl-2">
-        {% trans %}Items ordered{% endtrans %}
-    </div>
-
-    <div class="col-xl-2">
-        {% trans %}Date{% endtrans %}
-    </div>
-
-    <div class="col-xl-2">
-        {% trans %}Status{% endtrans %}
-    </div>
-
-</div>
-
+<h1>{% trans %}Orders{% endtrans %}</h1>
 <hr>
 
-{% for order in orders %}
+{{ block('filters') }}
 
-<div class="row">
+<table class="table table-striped w-100 table-hover">
 
-    <div class="col-xl-2">
-        <a href="/dashboard/orders/order?id={{ order.id }}">{% trans %}Order no.{% endtrans %} {{ order.id }}</a>
-    </div>
+    <thead>
+    <tr class="bg-success text-light">
+        <th>{% trans %}Order{% endtrans %}</th>
+        <th>{% trans %}Customer{% endtrans %}</th>
+        <th>{% trans %}Items ordered{% endtrans %}</th>
+        <th>{% trans %}Net value{% endtrans %}</th>
+        <th>{% trans %}Tax value{% endtrans %}</th>
+        <th>{% trans %}Gross value{% endtrans %}</th>
+        <th>{% trans %}Date{% endtrans %}</th>
+        <th>{% trans %}Status{% endtrans %}</th>
+    </tr>
+    </thead>
 
-    <div class="col-xl-2">
-        {{ order.firstName }} {{ order.lastName }}
-    </div>
+    <tbody>
+    {% for order in orders %}
+    <tr data-href="/dashboard/orders/order/{{ order.id }}">
+        <td>{{ order.id }}</td>
+        <td>{{ order.firstName }} {{ order.lastName }}</td>
+        <td>{{ order.quantity }}</td>
+        <td>{{ order.netAmount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+        <td>{{ order.taxAmount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+        <td>{{ order.amount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+        <td>{{ order.date | date('d.m.y H:i') }}</td>
+        <td>{% include 'chunks/order-status.html.twig' %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
 
-    <div class="col-xl-2">
-        {{ order.quantity }}
-    </div>
-
-    <div class="col-xl-2">
-        {{ order.date | date('d.m.y H:i') }}
-    </div>
-
-    <div class="col-xl-2">
-        {% include 'chunks/order-status.html.twig' %}
-    </div>
-
-</div>
-
-{% endfor %}
+</table>
 
 {% endblock %}

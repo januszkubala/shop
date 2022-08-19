@@ -1,0 +1,150 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block sidemenu %}
+
+        <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+            <a class="btn btn-dark btn-sm p-2 text-start" href="javascript:void()" onclick="getDocument('product-sheet', {{ product.id }})">
+                {% trans %}Product sheet{% endtrans %}
+                <i class="fa-solid fa-file-pdf float-end fa-fw mt-1"></i>
+            </a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/prices">{% trans %}Prices{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/stocks">{% trans %}Stock{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/edit">{% trans %}Edit product{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products">{% trans %}Return{% endtrans %}</a>
+        </div>
+
+<script>
+
+function getDocument(document, id) {
+
+    let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=1120,height=680,left=50,top=50`;
+
+    open('/document/' + document + '?id=' + id, '{% trans %}PDF Document{% endtrans %}', params);
+
+}
+
+</script>
+
+{% endblock %}
+
+
+{% block body %}
+
+    <h1>{{ product.name }}</h1>
+    <hr>
+
+        <div class="row">
+        <div class="col-xl-4">
+
+            <h5>{% trans %}Item identification{% endtrans %}</h5>
+
+            <table class="table table-sm">
+            <tbody>
+            <tr>
+                <th class="ps-0">{% trans %}Date of entry{% endtrans %}</th>
+                <td>{{ product.date | date('d.m.y') }}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Submitted by{% endtrans %}</th>
+                <td>{{ product.user.firstName }} {{ product.user.lastName }}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Price{% endtrans %}</th>
+                <td>
+                    {% include '/chunks/product-price-inline.html.twig' %}
+                    <p class="py-0 small"><a href="/dashboard/products/product/{{ product.id }}/prices">{% trans %}View price changes{% endtrans %}</a></p>
+                </td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Stock level{% endtrans %}</th>
+                <td>
+                    {{ product.stock }}
+                    <p class="py-0 small"><a href="/dashboard/products/product/{{ product.id }}/stocks">{% trans %}View stock changes{% endtrans %}</a></p>
+                </td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}EAN-13{% endtrans %}</th>
+                <td>{% if product.ean != null %}{{ product.ean }}{% else %}<span class="small text-muted">{% trans %}n/a{% endtrans %}</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}GTIN{% endtrans %}</th>
+                <td>{% if product.gtin != null %}{{ product.gtin }}{% else %}<span class="small text-muted">{% trans %}n/a{% endtrans %}</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}ISBN{% endtrans %}</th>
+                <td>{% if product.isbn != null %}{{ product.isbn }}{% else %}<span class="small text-muted">{% trans %}n/a{% endtrans %}</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <th class="ps-0"><abbr title="{% trans %}Manufacturer code{% endtrans %}">{% trans %}Mfr. code{% endtrans %}</abbr></th>
+                <td>{% if product.manufacturerCode != null %}{{ product.manufacturerCode }}{% else %}<span class="small text-muted">{% trans %}n/a{% endtrans %}</span>{% endif %}</td>
+            </tr>
+            </table>
+        </div>
+
+        <div class="col-xl-4">
+
+            <h5>{% trans %}Specifications{% endtrans %}</h5>
+
+            {% if product.propertyValues != null %}
+            <table class="table table-sm">
+                {% set properties = product.propertyValues %}
+                {% include '/chunks/product-property-values.html.twig' %}
+            </table>
+            {% endif %}
+
+        </div>
+
+
+        <div class="col-xl-4">
+
+            <h5>{% trans %}Additional information{% endtrans %}</h5>
+
+            {% if product.additionalProperties != null %}
+            <table class="table table-sm">
+                {% set additionalProperties = product.additionalProperties %}
+                {% include '/chunks/product-additional-properties.html.twig' %}
+            </table>
+            {% endif %}
+
+        </div>
+
+
+        </div>
+
+        <hr>
+
+        <h5>{% trans %}Last 10 orders{% endtrans %}</h5>
+
+        <table class="table table-striped w-100">
+        <thead>
+        <tr class="bg-success text-light">
+            <th>{% trans %}Order number{% endtrans %}</th>
+            <th>{% trans %}Order ref{% endtrans %}</th>
+            <th>{% trans %}Items ordered{% endtrans %}</th>
+            <th>{% trans %}Net value{% endtrans %}</th>
+            <th>{% trans %}Tax rate{% endtrans %}</th>
+            <th>{% trans %}Total{% endtrans %}</th>
+            <th>{% trans %}Status{% endtrans %}</th>
+            <th>{% trans %}Date{% endtrans %}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {#% for order in orders %}
+        <tr class="small">
+            <td><a href="/dashboard/orders/order/?id={{ order.id }}" class="text-danger">{{ order.id }}</a></td>
+            <td class="text-uppercase"><a href="/dashboard/orders/order/?id={{ order.id }}" class="text-danger">{{ order.ref }}</a></td>
+            <td>{{ order.quantity }}</td>
+            <td>{{ order.netAmount }}</td>
+            <td>{{ order.taxAmount }}</td>
+            <td>{{ order.amount }}</td>
+            <td></td>
+            <td>{{ order.date | date('d.m.y') }}</td>
+        </tr>
+        {% endfor %#}
+        </tbody>
+        </table>
+
+{% endblock %}
