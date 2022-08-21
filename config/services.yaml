@@ -32,6 +32,16 @@ services:
 
 parameters:
     timezone: '%env(APP_TIMEZONE)%'
+    local_cdn: '%kernel.project_dir%/public/cdn'
+    # Integrations
+    # credentials to be moved to configuration taken from the database
+    
     # Stripe
     stripe_publishable_key: 'pk_test_51LUGUJLEBDW78171V3a7txfLF3FYKJaMPZ1xlstAf5p9I1AAtJl2ixRO2eV74ZHpRVQlQyBBEEF1Zo1RRM27WsRV005ajfjbql'
     stripe_secret_key: 'sk_test_51LUGUJLEBDW78171OCyUweUF3fYpTgFF63vUzTiiryOkIP3KuY6YprTwBwVwuploJa3rwfcBnD3l3Rg42vh97WPL00RfmLMWgh'
+
+    # Amazon Web Services S3
+    aws_s3_key: 'AKIA5ZT4LIOUZ77Z2TW3'
+    aws_s3_secret: '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'
+    aws_s3_bucket: 'januszkubala'
+    aws_s3_region: 'eu-north-1'

@@ -38,6 +38,15 @@ class File
     #[ORM\Column]
     private ?int $file_size = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $cdn_host = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $cdn_account = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $cdn_server = null;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
@@ -142,6 +151,42 @@ class File
         return $this;
     }
 
+    public function getCdnHost(): ?string
+    {
+        return $this->cdn_host;
+    }
+
+    public function setCdnHost(?string $cdn_host): self
+    {
+        $this->cdn_host = $cdn_host;
+
+        return $this;
+    }
+
+    public function getCdnAccount(): ?string
+    {
+        return $this->cdn_account;
+    }
+
+    public function setCdnAccount(?string $cdn_account): self
+    {
+        $this->cdn_account = $cdn_account;
+
+        return $this;
+    }
+
+    public function getCdnServer(): ?string
+    {
+        return $this->cdn_server;
+    }
+
+    public function setCdnServer(?string $cdn_server): self
+    {
+        $this->cdn_server = $cdn_server;
+
+        return $this;
+    }
+
     public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
@@ -153,4 +198,5 @@ class File
 
         return $this;
     }
+
 }
