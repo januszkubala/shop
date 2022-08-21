@@ -20,14 +20,17 @@
 
 <div class="my-4">
 
-    <input type="file" name="file" id="file" class="d-none">
+    <input type="file" id="file" class="d-none" accept="image/*,application/pdf" multiple>
+    {#<input type="hidden" id="file-default" name="fileDefault" value="">#}
+
+    <div id="files-uploaded"></div>
 
     <div class="upload-area card p-5 text-secondary" id="drop-area">
 
         <div class="upload-trigger text-center my-5">
             <p><b class="fs-6"><i class="fa-solid fa-cloud-arrow-up fa-4x"></i><br><span id="drag-text">{% trans %}Drag files here{% endtrans %}</span></b></p>
             <div class="mt-3">
-            <label class="btn btn-secondary btn-sm small">{% trans %}or select files to upload{% endtrans %}</label>
+            <label class="btn btn-secondary btn-sm small" for="file">{% trans %}or select files to upload{% endtrans %}</label>
             </div>
         </div>
 
@@ -45,36 +48,55 @@
 //
 // Drag and drop HTML5 AJAX files uploader
 // © 2022 Janusz Kubala
-// Version 1.0b
+// Version 1.0
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // **************************************************************************
 
+
+// Required elements for the uploader
+let filesUploaded = document.getElementById("files-uploaded")
+let inputFile = document.getElementById("file")
+let fileDefault = document.getElementById("file-default")
 let dropArea = document.getElementById("drop-area")
 let dragText = document.getElementById("drag-text")
 let dropQueue = document.getElementById("drop-queue")
 
-dropArea.addEventListener("dragover", (e)=>{
+
+// When file(s) are uploaded via button
+inputFile.addEventListener("change", (e) => {
+
+    const files = inputFile.files
+    const filesArray = Array.from(files)
+
+    filesArray.forEach(file => {
+        addFile(file, dropQueue)
+    })
+
+})
+
+// When file(s) are dragged over the uploader
+dropArea.addEventListener("dragover", (e) => {
     e.preventDefault()
     dropArea.classList.add("active")
     dragText.textContent = "{% trans %}Release files here to upload{% endtrans %}";
 })
 
-dropArea.addEventListener("dragleave", ()=>{
+// When dropping is aborted
+dropArea.addEventListener("dragleave", () => {
     dropArea.classList.remove("active")
     dragText.textContent = "{% trans %}Drag files here{% endtrans %}";
 })
 
-dropArea.addEventListener("drop", (e)=>{
+// When file(s) are dropped to the uploader
+dropArea.addEventListener("drop", (e) => {
     e.preventDefault()
     
     const files = e.dataTransfer.files
     const filesArray = Array.from(files)
 
     filesArray.forEach(file => {
-
         addFile(file, dropQueue)
-
     })
 
 })
@@ -108,7 +130,6 @@ function addFile(file, dropQueue) {
         "image/png": "png",
         "image/gif": "gif",
         "application/pdf": "pdf"
-
     }
 
     if(typeof extensions[file.type] !== "undefined") {
@@ -121,8 +142,7 @@ function addFile(file, dropQueue) {
         let fileItem = document.createElement("div")
         fileItem.classList.add("file-item", "col-3", "text-center", "position-relative")
         let fileIcon = document.createElement("img")
-        fileIcon.classList.add("mb-3")
-        fileIcon.style.height = "8em"
+        fileIcon.classList.add("file-view", "mb-3")
         fileIcon.src = assetsIconsDir + extension + ".svg"
         fileIcon.alt = ""
         let fileProgress = document.createElement("div")
@@ -134,17 +154,53 @@ function addFile(file, dropQueue) {
         fileName.classList.add("small", "text-muted")
         fileName.innerText = truncate(file.name, 25)
 
+        let fileMenu = document.createElement("div")
+        fileMenu.classList.add("file-menu", "position-absolute")
+        let buttonDefault = document.createElement("button")
+        buttonDefault.classList.add("btn", "btn-sm", "btn-dark")
+        var icon = document.createElement("i")
+        icon.classList.add("fa-solid", "fa-eye", "fa-fw")
+
+
+        // If input for default element exists, turn this feature on
+        // otherwise ignore
+        if(buttonDefault.length > 0) {
+            buttonDefault.appendChild(icon)
+            buttonDefault.classList.add("disabled")
+            buttonDefault.disabled = true
+            fileMenu.appendChild(buttonDefault)
+        }
+
+        let buttonDelete = document.createElement("button")
+        buttonDelete.classList.add("btn", "btn-sm", "btn-dark")
+        var icon = document.createElement("i")
+        icon.classList.add("fa-solid", "fa-times", "fa-fw")
+        buttonDelete.appendChild(icon)
+
+        let fileForm = document.createElement("div")
+        fileForm.classList.add("mt-3")
+        let inputAlt = document.createElement("input")
+        inputAlt.classList.add("form-control", "form-control-x-sm")
+        inputAlt.placeholder = "{% trans %}Title{% endtrans %}"
+
+
+        fileForm.appendChild(inputAlt)
+        
+        fileMenu.appendChild(buttonDelete)
+
         fileItem.appendChild(fileIcon)
         fileItem.appendChild(fileProgress)
         fileProgress.appendChild(fileProgressBar)
         fileItem.appendChild(fileName)
         dropQueue.appendChild(fileItem)
+        fileItem.appendChild(fileMenu)
+        fileItem.appendChild(fileForm)
 
         let formData = new FormData()
         formData.append("file", file)
 
         let request = new XMLHttpRequest()
-        request.open("POST", "/file/upload")
+        request.open("POST", "/file/create")
         request.upload.addEventListener("progress", function(e) {
             
             let percentTotal = (e.loaded / e.total) * 100
@@ -153,29 +209,84 @@ function addFile(file, dropQueue) {
         })
         request.addEventListener("load", function(e) {
 
-            let image = JSON.parse(request.response)
+            let file = JSON.parse(request.response)
+
+            buttonDelete.dataset.id = file.id
 
             // If it's an image, display the thumbnail
-            if((image.mimeType).startsWith("image/") === true) {
+            if((file.mimeType).startsWith("image/") === true) {
+
+                // Enable default button as only image can be a default file
+                buttonDefault.classList.remove("disabled")
+                buttonDefault.disabled = true
                 
                 // If it is a local file
-                if(image.source == "local_cdn") {
+                if(file.source == "local_cdn") {
+                    // Get local uploads directory
                     let localCDNDir = "{{ asset('cdn/')}}"
-                    fileIcon.src = localCDNDir + image.fileName + "_thumb." + image.extension
+                    // Fetch and set thumbnail
+                    fileIcon.src = localCDNDir + file.fileName + "_thumb." + file.extension
                     fileIcon.classList.add("rounded")
                 }
 
             }
+
+            // Add event listener to the delete button
+            buttonDelete.addEventListener("click", (e) => {
+                
+                let id = buttonDelete.dataset.id
+
+                deleteFile(id, buttonDelete, fileItem)
+
+            })
 
             let cdnIcon = document.createElement("img")
             cdnIcon.classList.add("position-absolute", "cdn-provider", "bg-light", "rounded", "p-1", "border")
             cdnIcon.src = assetsLogosDir + "480x240-amazon-web-services.svg"
             fileItem.appendChild(cdnIcon)
 
+            let fileHelper = document.createElement("input")
+            fileHelper.type = "hidden"
+            fileHelper.value = file.id
+
+            filesUploaded.appendChild(fileHelper)
+
+
         })
         request.send(formData)
 
     }
+
+}
+
+function deleteFile(id, button, item) {
+
+    // Create loading icon
+    let loadingIcon = document.createElement("i")
+    loadingIcon.classList.add("fa-solid", "fa-circle-notch", "fa-spin", "fa-fw")
+
+    // Disable delete button
+    button.disabled = true
+    button.classList.add("disabled")
+
+    // Replace current icon
+    button.replaceChildren(loadingIcon)
+    
+    // Send DELETE request
+    let request = new XMLHttpRequest()
+    request.open("DELETE", "/file/delete/" + id)
+    request.addEventListener("load", function(e) {
+
+        // Fetch JSON response
+        let response = JSON.parse(request.response)
+
+        if(response.success) {
+            // Remove file if the file is removed
+            item.remove()
+        }
+
+    })
+    request.send()
 
 }
 

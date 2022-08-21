@@ -10,7 +10,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\File as FileConstraint;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
@@ -25,9 +31,65 @@ use Ramsey\Uuid\Uuid;
 class FileController extends AbstractController
 {
 
+    #[Route('/file/delete/{id}', name: 'app_file_delete', methods: ['DELETE'])]
+    public function delete(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
 
-    #[Route('/file/upload', name: 'app_file_upload', methods: ['POST'])]
-    public function upload(Request $request, SluggerInterface $slugger, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
+        $id = $request->get('id');
+        
+        $file = $entityManager->getRepository(File::class)->findOneBy(['id' => $id]);
+        
+        $response = [];
+
+        if($file == null) {
+        
+            $response['success'] = false;
+            $response['message'] = 'file_not_found';
+        
+        }
+        else {
+
+            switch($file->getSource()) {
+                
+                // Local CDN
+                case 'local_cdn': {
+
+                    $finder = new Finder();
+                    $finder->name($file->getFileName() . '*');
+
+                    foreach($finder->in($this->getParameter('local_cdn')) as $finderFile) {
+                        
+                        $filesystem = new Filesystem();
+                        $filesystem->remove($finderFile->getRealPath());
+
+                    }
+
+                } break;
+                
+                // Amazon S3
+                case 'amazon_s3': {
+
+                    foreach ($finder->in('s3://' . $this->getParameter('aws_s3_bucket')) as $file) {
+                        // ... do something with the file
+                    }
+
+                }
+
+            }
+                    
+            $entityManager->remove($file);
+            $entityManager->flush();
+
+            $response['success'] = true;
+        
+        }
+
+        return new JsonResponse($response);
+
+    }
+
+    #[Route('/file/create', name: 'app_file_create', methods: ['POST'])]
+    public function create(Request $request, SluggerInterface $slugger, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
 
         $s3 = false;
@@ -167,8 +229,7 @@ class FileController extends AbstractController
         return new JsonResponse(json_decode(['success' => false]));
 
     }
-
-
+    
     #[Route('/file', name: 'app_file')]
     public function index(): Response
     {

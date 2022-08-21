@@ -18,7 +18,7 @@ use Ramsey\Uuid\Uuid;
 class OrderController extends AbstractController
 {
 
-    #[Route('/order/create', name: 'app_order_create', methods: ['POST', 'GET'])]
+    #[Route('/order/create', name: 'app_order_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager, PriceRepository $priceRepository): Response
     {
 

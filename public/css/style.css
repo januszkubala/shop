@@ -85,8 +85,15 @@ label {
   background-color: rgb(245, 245, 245);
 }
 
+.file-item .file-view {
+  height: 8rem;
+}
 .file-item .cdn-provider {
   height: 2.5rem;
   top: 0;
   right: calc(var(--bs-gutter-x) * 0.5);
+}
+.file-item .file-menu {
+  top: calc(8rem - 31px);
+  left: calc(var(--bs-gutter-x) * 0.5);
 }/*# sourceMappingURL=style.css.map */
