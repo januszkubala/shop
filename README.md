@@ -1,1 +1,1 @@
-This project is NOT and open source. No commits are accepted.
+This project is NOT an open source. No commits are accepted.
