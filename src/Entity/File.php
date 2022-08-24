@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\FileRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -49,6 +51,12 @@ class File
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
+
+    private ?string $url = null;
+
+    private ?string $square_thumbnail_url = null;
+
+    private ?string $fixed_height_thumbnail_url = null;
 
     public function getId(): ?int
     {
@@ -195,6 +203,42 @@ class File
     public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(?string $url): self
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    public function getSquareThumbnailUrl(): ?string
+    {
+        return $this->square_thumbnail_url;
+    }
+
+    public function setSquareThumbnailUrl(?string $square_thumbnail_url): self
+    {
+        $this->square_thumbnail_url = $square_thumbnail_url;
+
+        return $this;
+    }
+
+    public function getFixedHeightThumbnailUrl(): ?string
+    {
+        return $this->fixed_height_thumbnail_url;
+    }
+
+    public function setFixedHeightThumbnailUrl(?string $fixed_height_thumbnail_url): self
+    {
+        $this->fixed_height_thumbnail_url = $fixed_height_thumbnail_url;
 
         return $this;
     }

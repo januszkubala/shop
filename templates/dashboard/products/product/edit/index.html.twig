@@ -1,25 +1,50 @@
 
 {% extends 'base-dashboard.html.twig' %}
 
-{% block title %}{% trans %}Edit{% endtrans %} | {{ product.name }}{% endblock %}
+{% block title %}
+    {% if product.name is not null %}
+        {% trans %}Edit{% endtrans %} | {{ product.name }}
+    {% else %}
+        {% trans %}Create product{% endtrans %}
+    {% endif %}
+{% endblock %}
 
 {% block sidemenu %}
+    <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+    
+    {% if product.id is not null %}
 
-        <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
-            <a class="btn btn-dark btn-sm p-2 text-start" href="javascript:void()" onclick="getDocument('product-sheet', {{ product.id }})">
-                {% trans %}Product sheet{% endtrans %}
-                <i class="fa-solid fa-file-pdf float-end fa-fw mt-1"></i>
-            </a>
-            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}">{% trans %}Return{% endtrans %}</a>
-        </div>
+        <a class="btn btn-dark btn-sm p-2 text-start" href="javascript:void()" onclick="getDocument('product-sheet', {{ product.id }})">
+            {% trans %}Product sheet{% endtrans %}
+            <i class="fa-solid fa-file-pdf float-end fa-fw mt-1"></i>
+        </a>
+        <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}">{% trans %}Return{% endtrans %}</a>
+    
+    {% else %}
+
+        <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products">{% trans %}Return{% endtrans %}</a>
+    
+    {% endif %}
+
+    </div>
 
 {% endblock %}
 
 
 {% block body %}
 
+    {% if product.id is not null %}
+
     <h1 class="me-0">{% trans %}Edit product{% endtrans %}</h1>
     <h5 class="ms-0">{{ product.name }}</h5>
+    
+    {% else %}
+    
+    <h1 class="me-0">{% trans %}Create product{% endtrans %}</h1>
+    
+    {% endif %}
+
+
     <hr>
 
     {{ form_start(productForm) }}
@@ -313,6 +338,8 @@
 
             <div class="product-additional-properties col-6">
 
+            {% if product.additionalProperties|length > 0 %}
+
                 {% for property in product.additionalProperties %}
                     <div class="additional-property row mb-2" data-id="{{ loop.index }}">
                         <div class="col-5">
@@ -331,23 +358,80 @@
                     </div>
                 {% endfor %}
 
+            {% else %}
+
+                <div class="additional-property row mb-2" data-id="0">
+                    <div class="col-5">
+                        <input type="text" class="form-control" name="additional_property[0][name]" value="" placeholder="{% trans %}Property name{% endtrans %}" />
+                    </div>
+                    <div class="col-5">
+                        <input type="text" class="form-control" name="additional_property[0][value]" value="" placeholder="{% trans %}Property value{% endtrans %}" />
+                    </div>
+                    <div class="col-2 text-end">
+                        <button type="button" class="product-additional-properties-add btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+            {% endif %}
+
             </div>
         </div>
 
     <hr class="my-4">
 
-    <h4>{% trans %}Item highlights{% endtrans %}</h4>
+    <h6>{% trans %}Product gallery / files{% endtrans %}</h6>
     <div class="form-text">
         <p>{% trans %}Add some features describing this product to make it more attractive to your customers.{% endtrans %}</p>
     </div>
+
+    <div>
+
+        <div 
+            id="file-manager-uploader" 
+            data-assetsiconsdir = "{{ asset('img/icons/extensions/')}}"
+            data-assetslogosdir = "{{ asset('img/logos/integrations/')}}"
+            data-assetslocalcdn = "{{ asset('cdn/')}}"
+            data-texttitle = "{% trans %}Title{% endtrans %}"
+            data-textdescription = "{% trans %}Description{% endtrans %}"
+            data-textalt = "{% trans %}Alt text (images only){% endtrans %}">
+
+            <input type="file" id="file" class="d-none" accept="image/*,application/pdf" multiple>
+            <input type="hidden" id="file-default" name="fileDefault" value="">
+
+            <div id="files-uploaded"></div>
+            <div class="upload-area card p-5 text-secondary" id="drop-area">
+                <div class="upload-trigger text-center my-5">
+                    <p><b class="fs-6"><i class="fa-solid fa-cloud-arrow-up fa-4x"></i>
+                    <br>
+                    <span id="drag-text" data-textdrag="{% trans %}Drag files here{% endtrans %}" data-textdragactive="{% trans %}Release files here to upload{% endtrans %}">{% trans %}Drag files here{% endtrans %}</span></b></p>
+                    <div class="mt-3">
+                    <label class="btn btn-secondary btn-sm small" for="file">{% trans %}or select files to upload{% endtrans %}</label>
+                    </div>
+                </div>
+                <div id="drop-queue" class="row"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <hr class="my-4">
+
+    <h6>{% trans %}Item highlights{% endtrans %}</h6>
+    <div class="form-text">
+        <p>{% trans %}Add some features describing this product to make it more attractive to your customers.{% endtrans %}</p>
+    </div>
+
     <div>
 
         <div class="row mb-2">
-            <div class="product-highlights col-6" id="product-highlights">
+            <div class="product-highlights col" id="product-highlights">
+
+            {% if product.highlights|length > 0 %}
                 {% for highlight in productForm.vars.value.highlights %}
                     <div class="row highlight mb-2" data-id="{{ loop.index }}">
                         <div class="col-10">
-                            <textarea name="product[highlights][{{ loop.index }}]" cols="40" rows="4" class="form-control">{{ highlight }}</textarea>
+                            <textarea name="product[highlights][{{ loop.index }}]" cols="40" rows="2" class="form-control">{{ highlight }}</textarea>
                         </div>
                         <div class="col-2 text-end">
                         {% if loop.index == 1 %}
@@ -358,6 +442,20 @@
                         </div>
                     </div>
                 {% endfor %}
+
+            {% else %}
+
+                <div class="row highlight mb-2" data-id="0">
+                    <div class="col-10">
+                        <textarea name="product[highlights][0]" cols="40" rows="2" class="form-control"></textarea>
+                    </div>
+                    <div class="col-2 text-end">
+                        <button type="button" class="product-highlights-add btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+            {% endif %}
+
             </div>
         </div>
 
@@ -397,6 +495,8 @@
         </div>
     </div>
 
+
+<script src="{{ asset('script/file-manager.js') }}"></script>
 
 <script>
 
@@ -929,7 +1029,7 @@ $(document).ready(function() {
         var newHighlight = `
             <div class="row highlight mb-2" data-id="%id%">
                 <div class="col-10">
-                    <textarea name="product[highlights][%id%]" cols="40" rows="4" class="form-control"></textarea>
+                    <textarea name="product[highlights][%id%]" cols="40" rows="2" class="form-control"></textarea>
                 </div>
                 <div class="col-2 text-end">
                     <button type="button" class="product-highlights-remove btn btn-sm btn-danger" data-id="%id%"><i class="fa-solid fa-minus"></i></button>

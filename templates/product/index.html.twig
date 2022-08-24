@@ -20,13 +20,26 @@
     <div class="row">
 
         <div class="col-5">
-            <div class="card bg-secondary">
-                {% if product.highlights is not null %}
-                <div class="img-card-top ratio ratio-1x1"></div>
-                {% else %}
-                <div class="img-card-top ratio ratio-4x3"></div>
-                {% endif %}
+            
+            <div class="media-gallery">
+            
+                <div class="media-preview ratio ratio-1x1">
+                </div>
+
+                <ul class="media-files">
+                {% for file in product.file %}
+                    {% if file.mimeType == 'image/jpeg' %}
+                    <li class="media-item" data-title="{{ file.title }}" data-description="{{ file.description }}" data-alt="{{ file.alt }}" data-type="{{ file.mimeType }}">
+                        <a href="{{ file.url }}"><img class="media-thumbnail" src="{{ file.fixedHeightThumbnailUrl }}" alt="{{ file.alt }}"></a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+
+                <script src="{{ asset('script/product-gallery.js') }}"></script>
+
             </div>
+
         </div>
 
         <div class="col-4">

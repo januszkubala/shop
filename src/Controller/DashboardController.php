@@ -4,8 +4,15 @@ namespace App\Controller;
 use App\Repository\ConfigurationRepository;
 
 use App\Entity\OrderComponent;
+use App\Entity\Product;
+use App\Entity\File;
+use App\Entity\Price;
+use App\Entity\Tax;
 use App\Entity\Payment;
+use App\Entity\Property;
+use App\Entity\PropertyValue;
 use App\Entity\Category;
+use App\Entity\Stock;
 use App\Form\ProductType;
 use App\Form\FilterOrdersFormType;
 use App\Repository\PropertyRepository;
@@ -72,8 +79,6 @@ class DashboardController extends AbstractController
 
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
-
-        //dd($form->createView());
         
         return $this->render('dashboard/products/product/edit/index.html.twig', [
             'configuration' => $this->configuration,
@@ -118,6 +123,137 @@ class DashboardController extends AbstractController
             'configuration' => $this->configuration,
             'product' => $product,
             'price' => $price
+        ]);
+
+    }
+
+    #[Route('/dashboard/products/create', name: 'app_dashboard_products_create')]
+    public function productCreate(Request $request, EntityManagerInterface $entityManager): Response
+    {
+
+        $product = new Product();
+        $properties = [];
+
+        $form = $this->createForm(ProductType::class, $product);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+
+            $product->setUser($this->getUser());
+            
+            if($request->get('product')['assignment'] == 'parent') {
+                $parent = $entityManager->getRepository(Product::class)->findOneBy(['id' => $request->get('product')['parent']]);
+                $category = $entityManager->getRepository(Category::class)->findOneBy(['id' => $parent->getCategory()]);
+                $product->setParent($parent);
+                $product->setCategory($category);
+            }
+            else {
+                $category = $entityManager->getRepository(Category::class)->findOneBy(['id' => $request->get('product')['category']]);
+                $product->setCategory($category);
+            }
+
+            if($request->get('property')) {
+                foreach($request->get('property') as $propertyId => $propertyValue) {
+                    if($propertyValue['value']) {
+                        
+                        $property = $entityManager->getRepository(Property::class)->findOneBy(['id' => $propertyId]);
+                        
+                        $value = new PropertyValue();
+
+                        switch($property->getType()) {
+
+                            case 'text': {
+                                $value->setText($propertyValue['value']);
+                            }
+                            break;
+
+                            case 'integer': {
+                                $value->setNumber($propertyValue['value']);
+                            }
+                            break;
+
+                            case 'decimal': {
+                                $value->setFloatingPointNumber($propertyValue['value']);
+                            }
+                            break;
+
+                        }
+
+                        if(isset($propertyValue['unit'])) {
+                            $value->setUnit($propertyValue['unit']);
+                        }
+
+                        $value->setProperty($property);
+                        $product->addPropertyValue($value);
+                        $entityManager->persist($value);
+                    }
+                }
+            }
+
+            $additionalProperties = [];
+            
+            if($request->get('additional_property')) {
+                foreach($request->get('additional_property') as $additionalProperty) {
+                    if($additionalProperty['value']) {
+                        $additionalProperties[] = $additionalProperty;
+                    }
+                }
+            }
+
+            $date = new \DateTime();
+
+            $product->setAdditionalProperties($additionalProperties);
+            $product->setDate($date);
+
+            $stock = new Stock();
+            $stock->setUser($this->getUser());
+            $stock->setProduct($product);
+            $stock->setDate($date);
+            $stock->setStockChange($product->getStock());
+            $stock->setChangesDescription('Initial stock level');
+
+            $price = new Price();
+            $price->setUser($this->getUser());
+            
+
+            $priceValue = 0;
+            
+            if(is_numeric($request->get('product')['price']) && $request->get('product')['price'] > 0) {
+                $priceValue = $request->get('product')['price'];
+            }
+
+            $tax = $entityManager->getRepository(Tax::class)->findOneById(['tax' => $request->get('product')['tax']]);
+
+            $price->setPrice($priceValue);
+            $price->setProduct($product);
+            $price->setDate($date);
+            $price->setTax($tax);
+
+            if($request->get('files')) {
+
+                foreach($request->get('files') as $fileId) {
+                    
+                    $file = $entityManager->getRepository(File::class)->findOneById(['id' => $fileId]);
+                    $product->addFile($file);
+
+                }
+
+            }
+            
+            $entityManager->persist($price);
+            $entityManager->persist($stock);
+            $entityManager->persist($product);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('/dashboard/products/product/' . $product->getId());
+
+        }
+        
+        return $this->render('dashboard/products/product/edit/index.html.twig', [
+            'configuration' => $this->configuration,
+            'productForm' => $form->createView(),
+            'product' => $product,
+            'properties' => $properties
         ]);
 
     }

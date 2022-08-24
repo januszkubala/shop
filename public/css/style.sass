@@ -8,7 +8,9 @@ body
 
 h1, h2, h3, h4, h5, h6
     font-family: Montserrat
+h1
     font-weight: 700
+    letter-spacing: -.05rem
 h2, h3, h4, h5, h6
     font-weight: 600
 b
@@ -18,6 +20,9 @@ label
 .form-control, .form-select
     font-size: .85rem
     padding: .375rem
+    &.form-control-xsm
+        font-size: 90%
+        padding: .25rem
 .modal
     .card
         padding: .375rem
@@ -75,3 +80,87 @@ label
     .file-menu
         top: calc($fm-icon-height - 31px)
         left: calc(var(--bs-gutter-x) * .5)
+
+.media-gallery
+    .media-files
+        overflow: hidden
+        list-style-type: none
+        padding: 0
+        margin: 0
+        display: flex
+        flex-direction: row
+        flex-wrap: nowrap
+        .media-item
+            flex: 1 0 0%
+            height: 7em
+            img
+                height: 100%
+    .media-preview
+        margin-bottom: .5rem
+        .media-navigator
+            z-index: 998
+            border: 1px solid rgba(0, 0, 0, .5)
+            //background: rgba(255, 255, 255, .25)
+            background: linear-gradient(-45deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 100%)
+        .media-preview-container
+            top: 0
+            z-index: 999
+            background-repeat: no-repeat
+            border: 1px solid #888
+        img
+            max-width: 100%
+            max-height: 100%
+            margin: auto
+            display: block
+.media-modal
+    width: 100%
+    height: 100%
+    z-index: 1000
+    background-color: rgba(255, 255, 255, .25)
+    position: fixed
+    left: 0
+    top: 0
+    backdrop-filter: blur(5px) grayscale(100%)
+    padding: 4rem
+    .modal-grid
+        width: 100%
+        height: 100%
+        display: flex
+        flex-direction: row
+        flex-wrap: nowrap
+        border: 1px solid rgba(200, 200, 200, 1)
+        border-radius: .5rem
+        overflow: hidden
+        .modal-content
+            flex: 1 0 0%
+            width: 75%
+            height: 100%
+            background-color: rgba(255, 255, 255, 1)
+            .modal-content-view
+                width: 100%
+                height: 100%
+                background-repeat: no-repeat
+                background-position: center center
+                background-size: contain
+            .modal-content-description
+                h3
+                    font-size: 1rem
+        .modal-menu
+            flex: .25 0 0%
+            width: 25%
+            height: 100%
+            background-color: rgba(255, 255, 255, .9)
+            .media-thumbnails-images
+                display: flex
+                flex-direction: row
+                flex-wrap: wrap
+                .media-item
+                    flex: 1 0 0%
+                    border: 1px solid rgba(230, 230, 230, 1)
+                    padding: .5rem
+                    border-radius: .25rem
+                    margin: .1rem
+                    img
+                        height: 7em
+                        display: block
+                        margin: auto

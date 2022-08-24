@@ -31,65 +31,8 @@ use Ramsey\Uuid\Uuid;
 class FileController extends AbstractController
 {
 
-    #[Route('/file/delete/{id}', name: 'app_file_delete', methods: ['DELETE'])]
-    public function delete(Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
-
-        $id = $request->get('id');
-        
-        $file = $entityManager->getRepository(File::class)->findOneBy(['id' => $id]);
-        
-        $response = [];
-
-        if($file == null) {
-        
-            $response['success'] = false;
-            $response['message'] = 'file_not_found';
-        
-        }
-        else {
-
-            switch($file->getSource()) {
-                
-                // Local CDN
-                case 'local_cdn': {
-
-                    $finder = new Finder();
-                    $finder->name($file->getFileName() . '*');
-
-                    foreach($finder->in($this->getParameter('local_cdn')) as $finderFile) {
-                        
-                        $filesystem = new Filesystem();
-                        $filesystem->remove($finderFile->getRealPath());
-
-                    }
-
-                } break;
-                
-                // Amazon S3
-                case 'amazon_s3': {
-
-                    foreach ($finder->in('s3://' . $this->getParameter('aws_s3_bucket')) as $file) {
-                        // ... do something with the file
-                    }
-
-                }
-
-            }
-                    
-            $entityManager->remove($file);
-            $entityManager->flush();
-
-            $response['success'] = true;
-        
-        }
-
-        return new JsonResponse($response);
-
-    }
-
     #[Route('/file/create', name: 'app_file_create', methods: ['POST'])]
-    public function create(Request $request, SluggerInterface $slugger, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
+    public function fileCreate(Request $request, SluggerInterface $slugger, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
 
         $s3 = false;
@@ -176,21 +119,21 @@ class FileController extends AbstractController
 
                     if(stripos($fileMimeType, 'image/') !== false) {
                         
-                        $image = Image::make($this->getParameter('local_cdn') . '/' . $newFileName . '.' . $fileExtension);
+                        $image = Image::make($this->getParameter('local_cdn') . $newFileName . '.' . $fileExtension);
                         $imageHeight = $image->height();
                         $imageWidth = $image->width();
                         $image->fit(240, 240);
-                        $image->save($this->getParameter('local_cdn') . '/' . $newFileName . '_thumb.' . $fileExtension);
+                        $image->save($this->getParameter('local_cdn') . $newFileName . '_thumb.' . $fileExtension);
                         
                         $newImageHeight = 200;
                         $imageRatio = $newImageHeight / $imageHeight;
                         $newImageWidth = round($imageWidth * $imageRatio);
 
-                        $image = Image::make($this->getParameter('local_cdn') . '/' . $newFileName . '.' . $fileExtension);
+                        $image = Image::make($this->getParameter('local_cdn') . $newFileName . '.' . $fileExtension);
                         $imageHeight = $image->height();
                         $imageWidth = $image->width();
                         $image->fit($newImageWidth, $newImageHeight);
-                        $image->save($this->getParameter('local_cdn') . '/' . $newFileName . '_thumb_h.' . $fileExtension);
+                        $image->save($this->getParameter('local_cdn') . $newFileName . '_thumb_h.' . $fileExtension);
 
                     }
 
@@ -230,11 +173,113 @@ class FileController extends AbstractController
 
     }
     
-    #[Route('/file', name: 'app_file')]
-    public function index(): Response
+    #[Route('/file/put/{id}', name: 'app_file_put', methods: ['PUT'])]
+    public function filePut(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        return $this->render('file/index.html.twig', [
-            'controller_name' => 'FileController',
-        ]);
+
+        $id = $request->get('id');
+        $data = json_decode($request->getContent(), true);
+        $file = $entityManager->getRepository(File::class)->findOneBy(['id' => $id]);
+        
+        $response = [];
+
+        if($file == null) {
+        
+            $response['success'] = false;
+            $response['message'] = 'file_not_found';
+        
+        }
+        else {
+
+            
+            if(isset($data['title'])) {
+                $file->setTitle($data['title']);
+            }
+
+            if(isset($data['description'])) {
+                $file->setDescription($data['description']);
+            }
+
+            if(isset($data['alt'])) {
+                $file->setAlt($data['alt']);
+            }
+                    
+            $entityManager->persist($file);
+            $entityManager->flush();
+
+            $response['success'] = true;
+        
+        }
+
+        return new JsonResponse($response);
+
     }
+
+    #[Route('/file/delete/{id}', name: 'app_file_delete', methods: ['DELETE'])]
+    public function fileDelete(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+
+        $id = $request->get('id');
+        
+        $file = $entityManager->getRepository(File::class)->findOneBy(['id' => $id]);
+        
+        $response = [];
+
+        if($file == null) {
+        
+            $response['success'] = false;
+            $response['message'] = 'file_not_found';
+        
+        }
+        else {
+
+            switch($file->getSource()) {
+                
+                // Local CDN
+                case 'local_cdn': {
+
+                    $finder = new Finder();
+                    $finder->name($file->getFileName() . '*');
+
+                    foreach($finder->in($this->getParameter('local_cdn')) as $finderFile) {
+                        
+                        $filesystem = new Filesystem();
+                        $filesystem->remove($finderFile->getRealPath());
+
+                    }
+
+                } break;
+                
+                // Amazon S3
+                case 'amazon_s3': {
+
+                    foreach ($finder->in('s3://' . $this->getParameter('aws_s3_bucket')) as $file) {
+                        // ... do something with the file
+                    }
+
+                }
+
+            }
+                    
+            $entityManager->remove($file);
+            $entityManager->flush();
+
+            $response['success'] = true;
+        
+        }
+
+        return new JsonResponse($response);
+
+    }
+
+    #[Route('/file/{id}', name: 'app_file_get', methods: ['GET'])]
+    public function fileGet(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        
+        $id = $request->get('id');
+
+        exit;
+
+    }
+
 }

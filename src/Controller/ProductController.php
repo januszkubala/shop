@@ -127,8 +127,6 @@ class ProductController extends AbstractController
             $price->setDate($date);
             $price->setTax($tax);
 
-            //dd($product);
-
             $entityManager->persist($price);
             $entityManager->persist($stock);
             $entityManager->persist($product);
@@ -191,6 +189,34 @@ class ProductController extends AbstractController
         $category = $entityManager->getRepository(Category::class)->findOneBy(['id' => $product->getCategory()]);
         $path = $repository->getPath($category);
         $price = $priceRepository->findCurrentPrice($product);
+
+        foreach($product->getFile() as $file) {
+
+            $host = null;
+
+            switch($file->getSource()) {
+                case 'local_cdn':
+                default: {
+
+                    // THIS HAS BE CHANGED AND THIS DIRECTORY SET M<UST BE TAKEN FROM services.yaml !!!!!
+                    $host = '../cdn/';
+                    
+                } break;
+            }
+
+            $file->setUrl($host . $file->getFileName() . '.' . $file->getExtension());
+
+            switch($file->getMimeType()) {
+                case 'image/jpeg':
+                case 'image/png':
+                case 'image/gif': {
+                    $file->setSquareThumbnailUrl($host . $file->getFileName() . '_thumb.' . $file->getExtension());
+                    $file->setFixedHeightThumbnailUrl($host . $file->getFileName() . '_thumb_h.' . $file->getExtension());
+
+                } break;
+            }
+
+        }
 
         return $this->render('product/index.html.twig', [
             'product' => $product,

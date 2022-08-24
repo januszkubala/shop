@@ -71,12 +71,16 @@ class Product
     #[ORM\Column(nullable: true)]
     private ?array $highlights = [];
 
+    #[ORM\ManyToMany(targetEntity: File::class)]
+    private Collection $file;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
         $this->price = new ArrayCollection();
         $this->propertyValues = new ArrayCollection();
         $this->stocks = new ArrayCollection();
+        $this->file = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -375,6 +379,30 @@ class Product
     public function setHighlights(?array $highlights): self
     {
         $this->highlights = $highlights;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, File>
+     */
+    public function getFile(): Collection
+    {
+        return $this->file;
+    }
+
+    public function addFile(File $file): self
+    {
+        if (!$this->file->contains($file)) {
+            $this->file->add($file);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(File $file): self
+    {
+        $this->file->removeElement($file);
 
         return $this;
     }
