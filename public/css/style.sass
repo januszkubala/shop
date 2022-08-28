@@ -2,6 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Dosis:wght@400;700&display=swap")
 
 $fm-icon-height: 8rem
+$btn-close-bg: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='#000000'><path d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/></svg>") !default
 
 body
     font-size: 85% !important
@@ -81,6 +82,12 @@ label
         top: calc($fm-icon-height - 31px)
         left: calc(var(--bs-gutter-x) * .5)
 
+.shopping-cart
+    .item-image
+        background-color: transparent
+        background-size: contain
+        background-position: center center
+
 .media-gallery
     .media-files
         overflow: hidden
@@ -112,55 +119,84 @@ label
             max-height: 100%
             margin: auto
             display: block
+
 .media-modal
     width: 100%
     height: 100%
     z-index: 1000
-    background-color: rgba(255, 255, 255, .25)
+    background-color: rgba(0, 0, 0, .5)
     position: fixed
     left: 0
     top: 0
-    backdrop-filter: blur(5px) grayscale(100%)
     padding: 4rem
-    .modal-grid
+    backdrop-filter: /*blur(5px)*/ grayscale(100%)
+    .modal-body
         width: 100%
         height: 100%
-        display: flex
-        flex-direction: row
-        flex-wrap: nowrap
+        padding: 3rem 1rem 1rem
         border: 1px solid rgba(200, 200, 200, 1)
+        background-color: rgba(255, 255, 255, 1)
         border-radius: .5rem
-        overflow: hidden
-        .modal-content
-            flex: 1 0 0%
-            width: 75%
-            height: 100%
-            background-color: rgba(255, 255, 255, 1)
-            .modal-content-view
-                width: 100%
-                height: 100%
+        position: relative
+        .modal-bar
+            width: 100%
+            padding: 1rem
+            position: absolute
+            top: 0
+            left: 0
+            .modal-close
+                float: right
+                padding: 1rem
+                width: 2rem
+                height: 2rem
+                border: none
+                border-radius: .5rem
+                background-color: rgba(220, 220, 220, 1)
+                background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjBweCIgeT0iMHB4Igp3aWR0aD0iMzAiIGhlaWdodD0iMzAiCnZpZXdCb3g9IjAgMCAzMCAzMCIKc3R5bGU9IiBmaWxsOiMwMDAwMDA7Ij4gICAgPHBhdGggZD0iTSA3IDQgQyA2Ljc0NDEyNSA0IDYuNDg3OTY4NyA0LjA5NzQ2ODcgNi4yOTI5Njg4IDQuMjkyOTY4OCBMIDQuMjkyOTY4OCA2LjI5Mjk2ODggQyAzLjkwMTk2ODcgNi42ODM5Njg4IDMuOTAxOTY4NyA3LjMxNzAzMTMgNC4yOTI5Njg4IDcuNzA3MDMxMiBMIDExLjU4NTkzOCAxNSBMIDQuMjkyOTY4OCAyMi4yOTI5NjkgQyAzLjkwMTk2ODcgMjIuNjgzOTY5IDMuOTAxOTY4NyAyMy4zMTcwMzEgNC4yOTI5Njg4IDIzLjcwNzAzMSBMIDYuMjkyOTY4OCAyNS43MDcwMzEgQyA2LjY4Mzk2ODggMjYuMDk4MDMxIDcuMzE3MDMxMyAyNi4wOTgwMzEgNy43MDcwMzEyIDI1LjcwNzAzMSBMIDE1IDE4LjQxNDA2MiBMIDIyLjI5Mjk2OSAyNS43MDcwMzEgQyAyMi42ODI5NjkgMjYuMDk4MDMxIDIzLjMxNzAzMSAyNi4wOTgwMzEgMjMuNzA3MDMxIDI1LjcwNzAzMSBMIDI1LjcwNzAzMSAyMy43MDcwMzEgQyAyNi4wOTgwMzEgMjMuMzE2MDMxIDI2LjA5ODAzMSAyMi42ODI5NjkgMjUuNzA3MDMxIDIyLjI5Mjk2OSBMIDE4LjQxNDA2MiAxNSBMIDI1LjcwNzAzMSA3LjcwNzAzMTIgQyAyNi4wOTgwMzEgNy4zMTcwMzEyIDI2LjA5ODAzMSA2LjY4Mjk2ODggMjUuNzA3MDMxIDYuMjkyOTY4OCBMIDIzLjcwNzAzMSA0LjI5Mjk2ODggQyAyMy4zMTYwMzEgMy45MDE5Njg3IDIyLjY4Mjk2OSAzLjkwMTk2ODcgMjIuMjkyOTY5IDQuMjkyOTY4OCBMIDE1IDExLjU4NTkzOCBMIDcuNzA3MDMxMiA0LjI5Mjk2ODggQyA3LjUxMTUzMTIgNC4wOTc0Njg3IDcuMjU1ODc1IDQgNyA0IHoiPjwvcGF0aD48L3N2Zz4=')
                 background-repeat: no-repeat
                 background-position: center center
-                background-size: contain
-            .modal-content-description
-                h3
-                    font-size: 1rem
-        .modal-menu
-            flex: .25 0 0%
-            width: 25%
+                background-size: 1rem 1rem
+                transition: .5s all ease
+                &:hover
+                    background-color: rgba(200, 200, 200, 1)
+                &:active
+                    background-color: rgba(170, 170, 170, 1)
+                    
+        .modal-grid
+            width: 100%
             height: 100%
-            background-color: rgba(255, 255, 255, .9)
-            .media-thumbnails-images
-                display: flex
-                flex-direction: row
-                flex-wrap: wrap
-                .media-item
-                    flex: 1 0 0%
-                    border: 1px solid rgba(230, 230, 230, 1)
-                    padding: .5rem
-                    border-radius: .25rem
-                    margin: .1rem
-                    img
-                        height: 7em
-                        display: block
-                        margin: auto
+            display: flex
+            flex-direction: row
+            justify-content: space-between
+            overflow: hidden
+            .modal-content
+                height: 100%
+                .modal-content-view
+                    width: 100%
+                    height: 100%
+                    background-repeat: no-repeat
+                    background-position: center center
+                    background-size: contain
+                    padding: 1rem
+                .modal-content-description
+                    padding: 1rem
+                    h3
+                        font-size: 1rem
+            .modal-menu
+                flex: 1 0 25%
+                height: 100%
+                padding: 1rem
+                align-content: flex-start
+                .media-thumbnails-images
+                    display: flex
+                    flex-direction: row
+                    flex-wrap: wrap
+                    .media-item
+                        border: 1px solid rgba(230, 230, 230, 1)
+                        padding: .5rem
+                        border-radius: .25rem
+                        margin: .1rem
+                        img
+                            height: 7em
+                            display: block
+                            margin: auto

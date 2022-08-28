@@ -1,0 +1,43 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}Settings{% endblock %}
+
+
+{% block sidemenu %}
+
+    <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+        <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard">{% trans %}Return{% endtrans %}</a>
+    </div>
+
+{% endblock %}
+
+
+{% block body %}
+
+<h1>{% trans %}Preferences &amp; System{% endtrans %}</h1>
+<hr>
+
+<div class="row mt-5 mb-5">
+
+    <div class="col-4">
+
+        <p class="mt-3 mb-1"><b><a class="btn btn-dark rounded-pill" href="/dashboard/configuration/regional">{% trans %}Regional Settings{% endtrans %}</a></b></h5>
+        <p class="my-0 small">
+        {% trans %}Regional preferences like language, currency, location and time zone.{% endtrans %}
+        </p>
+
+    </div>
+
+    <div class="col-4">
+
+        <p class="mt-3 mb-1"><b><a class="btn btn-dark rounded-pill" href="/dashboard/configuration/access">{% trans %}Access Management{% endtrans %}</a></b></h5>
+        <p class="my-0 small">
+        {% trans %}Administrators and other staff members' roles, privileges and levels of access management.{% endtrans %}
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

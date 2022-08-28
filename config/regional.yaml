@@ -1,0 +1,4 @@
+parameters:
+    timezone: Europe/Warsaw
+    locale: en_GB
+    currency: EUR

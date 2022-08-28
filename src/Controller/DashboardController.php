@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Controller;
-use App\Repository\ConfigurationRepository;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 use App\Entity\OrderComponent;
 use App\Entity\Product;
@@ -13,8 +13,11 @@ use App\Entity\Property;
 use App\Entity\PropertyValue;
 use App\Entity\Category;
 use App\Entity\Stock;
+use App\Entity\Configuration;
 use App\Form\ProductType;
-use App\Form\FilterOrdersFormType;
+use App\Form\FilterOrdersType;
+use App\Form\FilterUsersType;
+use App\Form\ConfigurationRegionalType;
 use App\Repository\PropertyRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\OrderRepository;
@@ -22,7 +25,9 @@ use App\Repository\UserRepository;
 use App\Repository\ProductRepository;
 use App\Repository\PriceRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Yaml\Yaml;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -33,22 +38,11 @@ use Symfony\Component\HttpFoundation\Cookie;
 class DashboardController extends AbstractController
 {
 
-    private $configuration;
-
-    public function __construct(ConfigurationRepository $configurationRepository) {
-        
-        $configuration = $configurationRepository->findOneBy(['is_current' => true]);
-
-        $this->configuration = $configuration;
-
-    }
-
     #[Route('/dashboard/files', name: 'app_dashboard_files')]
     public function filesIndex(Request $request, OrderRepository $orderRepository): Response
     {
 
         return $this->render('dashboard/files/index.html.twig', [
-            'configuration' => $this->configuration
         ]);
 
     }
@@ -81,7 +75,6 @@ class DashboardController extends AbstractController
         $form->handleRequest($request);
         
         return $this->render('dashboard/products/product/edit/index.html.twig', [
-            'configuration' => $this->configuration,
             'productForm' => $form->createView(),
             'product' => $product,
             'properties' => $properties,
@@ -100,7 +93,6 @@ class DashboardController extends AbstractController
         $price = $priceRepository->findCurrentPrice($product);
         
         return $this->render('dashboard/products/product/prices/index.html.twig', [
-            'configuration' => $this->configuration,
             'product' => $product,
             'price' => $price
         ]);
@@ -116,11 +108,7 @@ class DashboardController extends AbstractController
         $product = $productRepository->findOneWithEntitiesBy(['id' => $id]);
         $price = $priceRepository->findCurrentPrice($product);
         
-        //dd($price);
-        //dd($this->configuration);
-        
         return $this->render('dashboard/products/product/index.html.twig', [
-            'configuration' => $this->configuration,
             'product' => $product,
             'price' => $price
         ]);
@@ -250,7 +238,6 @@ class DashboardController extends AbstractController
         }
         
         return $this->render('dashboard/products/product/edit/index.html.twig', [
-            'configuration' => $this->configuration,
             'productForm' => $form->createView(),
             'product' => $product,
             'properties' => $properties
@@ -274,7 +261,6 @@ class DashboardController extends AbstractController
         $orders = $orderRepository->findBy(['user' => $user]);
 
         return $this->render('dashboard/users/user/index.html.twig', [
-            'configuration' => $this->configuration,
             'user' => $user,
             'countries' => $countries,
             'orders' => $orders
@@ -296,7 +282,6 @@ class DashboardController extends AbstractController
         $users = $userRepository->findAllAndSortBy('id', 'DESC');
 
         return $this->render('dashboard/users/index.html.twig', [
-            'configuration' => $this->configuration,
             'users' => $users,
             'countries' => $countries
         ]);
@@ -325,7 +310,6 @@ class DashboardController extends AbstractController
 
 
         return $this->render('dashboard/orders/order/payments/index.html.twig', [
-            'configuration' => $this->configuration,
             'payments' => $payments,
             'order' => $order,
             'countries' => $countries
@@ -356,7 +340,6 @@ class DashboardController extends AbstractController
 
 
         return $this->render('dashboard/orders/order/index.html.twig', [
-            'configuration' => $this->configuration,
             'order' => $order,
             'components' => $components,
             'payments' => $payments,
@@ -371,7 +354,7 @@ class DashboardController extends AbstractController
 
         $response = new Response();
 
-        $form = $this->createForm(FilterOrdersFormType::class, []);
+        $form = $this->createForm(FilterOrdersType::class, []);
         $form->handleRequest($request);
 
         $filters = [
@@ -457,9 +440,8 @@ class DashboardController extends AbstractController
         }
 
         $response->sendHeaders();
-        
+
         return $this->render('dashboard/orders/index.html.twig', [
-            'configuration' => $this->configuration,
             'orders' => $orders,
             'filtersForm' => $form->createView()
         ]);
@@ -467,13 +449,130 @@ class DashboardController extends AbstractController
     }
 
     #[Route('/dashboard/settings', name: 'app_dashboard_settings')]
-    public function settingsIndex(Request $request, OrderRepository $orderRepository): Response
+    public function settingsIndex(Request $request): Response
     {
         
         // We'll see what's gonna be in here xD
 
         return $this->render('dashboard/settings/index.html.twig', [
-            'configuration' => $this->configuration
+        ]);
+
+    }
+
+    #[Route('/dashboard/configuration/access', name: 'app_dashboard_configuration_access')]
+    public function configurationAccessIndex(Request $request, TranslatorInterface $translator, UserRepository $userRepository): Response
+    {
+
+        $response = new Response();
+
+        $form = $this->createForm(FilterUsersType::class, []);
+        $form->handleRequest($request);
+
+        $filters = [
+            'query' => null,
+            'email' => null
+        ];
+
+        if($form->isSubmitted() && $form->isValid()) {
+
+            $filters['query'] = $form->get('query')->getData();
+            $filters['email'] = $form->get('email')->getData();
+            
+            $response->headers->setCookie(Cookie::create('filters_access', base64_encode(json_encode($filters))));
+
+        }
+        elseif($request->query->get('filters') == 'reset') {
+            
+            $response->headers->clearCookie('filters_access', '/', null);
+
+        }
+        elseif($request->cookies->get('filters_access')) {
+
+            $filters = json_decode(base64_decode($request->cookies->get('filters_orders')), true);
+            
+            if(isset($filters['query'])) {
+
+                $form->get('query')->setData($filters['query']);
+
+            }
+
+            if(isset($filters['email'])) {
+
+                $form->get('email')->setData($filters['email']);
+
+            }
+            
+        }
+
+        if(isset($filters['query']) && $filters['query'] != null || isset($filters['email']) && $filters['email'] != null) {
+
+            $users = $userRepository->findFilteredUsers($filters);
+        
+        }
+        else {
+
+            $users = $userRepository->findAll();
+
+        }
+
+        $roles = [
+            'ROLE_USER' => $translator->trans('Registered user')
+        ];
+
+        $response->sendHeaders();
+
+        return $this->render('dashboard/configuration/access/index.html.twig', [
+            'filtersForm' => $form->createView(),
+            'users' => $users,
+            'roles' => $roles
+        ]);
+
+    }
+
+    #[Route('/dashboard/configuration/regional', name: 'app_dashboard_configuration_regional')]
+    public function configurationGeneralIndex(Request $request, EntityManagerInterface $entityManager, ParameterBagInterface $parameters): Response
+    {
+
+        $configuration = new Configuration();
+        $configuration->setTimezone($parameters->get('timezone'));
+        $configuration->setLocale($parameters->get('locale'));
+        $configuration->setCurrency($parameters->get('currency'));
+
+        $form = $this->createForm(ConfigurationRegionalType::class, $configuration);
+        $form->handleRequest($request);
+
+        $saved = false;
+
+        if($form->isSubmitted() && $form->isValid()) {
+
+            $saved = true;
+
+            // Set new configuration
+            $yaml = [
+                'parameters' => [
+                    'timezone' => $form->get('timezone')->getData(),
+                    'locale' => $form->get('locale')->getData(),
+                    'currency' => $form->get('currency')->getData()
+                ]
+            ];
+
+            // Save to regional.yaml
+            file_put_contents('../config/regional.yaml', Yaml::dump($yaml));
+            
+        }
+
+        return $this->render('dashboard/configuration/regional/index.html.twig', [
+            'configurationForm' => $form->createView(),
+            'saved' => $saved
+        ]);
+
+    }
+
+    #[Route('/dashboard/configuration', name: 'app_dashboard_configuration')]
+    public function configurationIndex(Request $request): Response
+    {
+
+        return $this->render('dashboard/configuration/index.html.twig', [
         ]);
 
     }

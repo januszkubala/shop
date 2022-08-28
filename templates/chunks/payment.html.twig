@@ -7,7 +7,7 @@
         </tr>
         <tr>
             <td class="ps-0">{% trans %}Amount{% endtrans %}</td>
-            <td colspan="2">{{ payment.amount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+            <td colspan="2">{{ payment.amount | format_currency(currency, locale = locale) }}</td>
         </tr>
 
         <tr>

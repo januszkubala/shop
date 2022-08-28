@@ -167,7 +167,7 @@
 
                 <tr>
                     <th>{% trans %}Order value*:{% endtrans %}</th>
-                    <td>{{ order.amount }}</td>
+                    <td>{{ order.amount | format_currency(currency, locale = locale) }}</td>
                 </tr>
 
             </table>

@@ -74,6 +74,9 @@ class Product
     #[ORM\ManyToMany(targetEntity: File::class)]
     private Collection $file;
 
+    #[ORM\ManyToOne]
+    private ?File $default_image = null;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -386,7 +389,7 @@ class Product
     /**
      * @return Collection<int, File>
      */
-    public function getFile(): Collection
+    public function getFiles(): Collection
     {
         return $this->file;
     }
@@ -403,6 +406,18 @@ class Product
     public function removeFile(File $file): self
     {
         $this->file->removeElement($file);
+
+        return $this;
+    }
+
+    public function getDefaultImage(): ?File
+    {
+        return $this->default_image;
+    }
+
+    public function setDefaultImage(?File $default_image): self
+    {
+        $this->default_image = $default_image;
 
         return $this;
     }

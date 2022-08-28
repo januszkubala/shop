@@ -1,7 +1,6 @@
-
 {% extends 'base-dashboard.html.twig' %}
 
-{% block title %}Products{% endblock %}
+{% block title %}Orders{% endblock %}
 
 {% block filters %}
 
@@ -144,36 +143,42 @@ $("table.table-hover").on("click", "[data-href]", function() {
 
 {{ block('filters') }}
 
-<table class="table table-striped w-100 table-hover">
 
-    <thead>
-    <tr class="bg-success text-light">
-        <th>{% trans %}Order{% endtrans %}</th>
-        <th>{% trans %}Customer{% endtrans %}</th>
-        <th>{% trans %}Items ordered{% endtrans %}</th>
-        <th>{% trans %}Net value{% endtrans %}</th>
-        <th>{% trans %}Tax value{% endtrans %}</th>
-        <th>{% trans %}Gross value{% endtrans %}</th>
-        <th>{% trans %}Date{% endtrans %}</th>
-        <th>{% trans %}Status{% endtrans %}</th>
-    </tr>
-    </thead>
 
-    <tbody>
-    {% for order in orders %}
-    <tr data-href="/dashboard/orders/order/{{ order.id }}">
-        <td>{{ order.id }}</td>
-        <td>{{ order.firstName }} {{ order.lastName }}</td>
-        <td>{{ order.quantity }}</td>
-        <td>{{ order.netAmount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
-        <td>{{ order.taxAmount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
-        <td>{{ order.amount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
-        <td>{{ order.date | date('d.m.y H:i') }}</td>
-        <td>{% include 'chunks/order-status.html.twig' %}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
+{% if orders is not null %}
 
-</table>
+    <table class="table table-striped w-100 table-hover">
+
+        <thead>
+        <tr class="bg-success text-light">
+            <th>{% trans %}Order{% endtrans %}</th>
+            <th>{% trans %}Customer{% endtrans %}</th>
+            <th>{% trans %}Items ordered{% endtrans %}</th>
+            <th>{% trans %}Net value{% endtrans %}</th>
+            <th>{% trans %}Tax value{% endtrans %}</th>
+            <th>{% trans %}Gross value{% endtrans %}</th>
+            <th>{% trans %}Date{% endtrans %}</th>
+            <th>{% trans %}Status{% endtrans %}</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for order in orders %}
+        <tr data-href="/dashboard/orders/order/{{ order.id }}">
+            <td>{{ order.id }}</td>
+            <td>{{ order.firstName }} {{ order.lastName }}</td>
+            <td>{{ order.quantity }}</td>
+            <td>{{ order.netAmount | format_currency(currency, locale = locale) }}</td>
+            <td>{{ order.taxAmount | format_currency(currency, locale = locale) }}</td>
+            <td>{{ order.amount | format_currency(currency, locale = locale) }}</td>
+            <td>{{ order.date | date('d.m.y H:i') }}</td>
+            <td>{% include 'chunks/order-status.html.twig' %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+
+    </table>
+
+{% endif %}
 
 {% endblock %}

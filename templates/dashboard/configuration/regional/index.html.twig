@@ -1,0 +1,69 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}Regional Preferences{% endblock %}
+
+
+{% block sidemenu %}
+
+    <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+        <button class="btn btn-dark btn-sm p-2 text-start">{% trans %}Save changes{% endtrans %}</button>
+        <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/configuration">{% trans %}Return{% endtrans %}</a>
+    </div>
+
+{% endblock %}
+
+
+{% block body %}
+
+<h1>{% trans %}Regional Preferences{% endtrans %}</h1>
+<hr>
+
+{% if saved %}
+<div class="alert alert-success">
+    <i class="fa-solid fa-circle-check fa-fw me-2"></i>
+    {% trans %}Changes saved{% endtrans %}
+</div>
+{% endif %}
+
+{{ form_start(configurationForm) }}
+
+    <div class="row mt-5 mb-5">
+
+        <div class="col-4">
+            {{ form_label(configurationForm.locale) }}
+            {{ form_widget(configurationForm.locale, {attr: {class: 'form-select'}}) }}
+            {% if configurationForm.locale.vars.help is not null %}
+            <div class="form-text">
+                {{ form_help(configurationForm.locale) }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-4">
+            {{ form_label(configurationForm.timezone) }}
+            {{ form_widget(configurationForm.timezone, {attr: {class: 'form-select'}}) }}
+            {% if configurationForm.timezone.vars.help is not null %}
+            <div class="form-text">
+                {{ form_help(configurationForm.timezone) }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-4">
+            {{ form_label(configurationForm.currency) }}
+            {{ form_widget(configurationForm.currency, {attr: {class: 'form-select'}}) }}
+            {% if configurationForm.currency.vars.help is not null %}
+            <div class="form-text">
+                {{ form_help(configurationForm.currency) }}
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {{ form_widget(configurationForm.submit, {attr: {class: 'btn btn-success'}}) }}
+
+{{ form_end(configurationForm) }}
+
+{% endblock %}

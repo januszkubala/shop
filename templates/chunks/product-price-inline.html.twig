@@ -3,12 +3,12 @@
 
     {% set grossPrice = price.price + price.price * price.tax.rate %}
 
-    <b>{{ grossPrice | format_currency(configuration.currency, locale = configuration.locale) }}</b>
+    <b>{{ grossPrice | format_currency(currency, locale = locale) }}</b>
 
     {% if price.previousPrice != null %}
 
         {% set previousPrice = price.previousPrice + price.previousPrice * price.tax.rate %}
-        <span class="badge rounded-pill text-bg-danger">{% trans %}Was{% endtrans %} {{ previousPrice | format_currency(configuration.currency, locale = configuration.locale) }}</span>
+        <span class="badge rounded-pill text-bg-danger">{% trans %}Was{% endtrans %} {{ previousPrice | format_currency(currency, locale = locale) }}</span>
 
         {% if price.dateValidFrom != null or price.dateValidTo != null %}
             <div class="mt-2">
@@ -25,6 +25,6 @@
 
     {% endif %}
 
-    {#{ price.price + price.price * price.tax.rate | format_currency(configuration.currency, locale = configuration.locale) }#}
+    {#{ price.price + price.price * price.tax.rate | format_currency(currency, locale = locale) }#}
 
 {% endif %}

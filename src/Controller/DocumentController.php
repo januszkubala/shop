@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Controller;
-use App\Repository\ConfigurationRepository;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 use App\Repository\OrderRepository;
 use App\Repository\OrderComponentRepository;
@@ -23,12 +23,9 @@ class DocumentController extends AbstractController
 
     private $configuration;
 
-    public function __construct(ConfigurationRepository $configurationRepository) {
-        
-        $configuration = $configurationRepository->findOneBy(['is_current' => true]);
-
-        $this->configuration = $configuration;
-
+    public function __construct(ParameterBagInterface $parameters)
+    {
+        $configuration = $parameters->all();
     }
 
     #[Route('/document/order-sheet', name: 'app_document_order_sheet')]

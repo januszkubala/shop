@@ -27,7 +27,7 @@
                 </div>
 
                 <ul class="media-files">
-                {% for file in product.file %}
+                {% for file in product.files %}
                     {% if file.mimeType == 'image/jpeg' %}
                     <li class="media-item" data-title="{{ file.title }}" data-description="{{ file.description }}" data-alt="{{ file.alt }}" data-type="{{ file.mimeType }}">
                         <a href="{{ file.url }}"><img class="media-thumbnail" src="{{ file.fixedHeightThumbnailUrl }}" alt="{{ file.alt }}"></a>
@@ -65,12 +65,14 @@
                 </tr>
             {% endfor %}
             
+            {#
             {% for property in product.additionalProperties %}
                 <tr>
                 <th class="ps-0">{{ property.name }}</th>
                 <td>{{ property.value }}</td>
                 </tr>
             {% endfor %}
+            #}
             </tbody>
             </table>
 
@@ -147,10 +149,9 @@
 
         <div class="col-6">
 
-            <h4 class="fs-4">Technical specification</h4>
+            <h5>Specification</h5>
 
             <table class="table table-striped-columns table-sm">
-
             {% for value in product.propertyValues %}
                 <tr>
                 <td class="ps-0">{{ value.property.name }}</td>
@@ -169,7 +170,15 @@
                 </td>
                 </tr>
             {% endfor %}
-            
+            </table>
+
+        </div>
+        
+        <div class="col-6">
+
+            <h5>Information</h5>
+
+            <table class="table table-striped-columns table-sm">
             {% for property in product.additionalProperties %}
                 <tr>
                 <td class="ps-0">{{ property.name }}</td>
@@ -177,7 +186,6 @@
                 </tr>
             {% endfor %}
             </table>
-
         </div>
 
     </div>

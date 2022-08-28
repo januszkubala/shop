@@ -80,7 +80,7 @@ function getDocument(document, id) {
             <td>
                 <img src="{{ asset('img/icons/cards/' ~ payment.cardBrand ~ '.svg') }}" style="width:2rem">
             </td>
-            <td>{{ payment.amount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+            <td>{{ payment.amount | format_currency(currency, locale = locale) }}</td>
             <td>
             {% if payment.isAutomatic == true %}
             {% trans %}Automatic{% endtrans %}

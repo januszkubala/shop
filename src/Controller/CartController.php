@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Entity\Price;
+use App\Repository\ProductRepository;
 use App\Repository\PriceRepository;
+use App\Repository\FileRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +19,7 @@ class CartController extends AbstractController
 {
 
     #[Route('/api/cart/put', name: 'api_cart_put', methods: ['PUT'])]
-    public function put(Request $request, EntityManagerInterface $entityManager, PriceRepository $priceRepository): JsonResponse
+    public function put(Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository, PriceRepository $priceRepository): JsonResponse
     {
 
         $cart = json_decode(base64_decode($request->cookies->get('cart')), true);
@@ -36,22 +38,70 @@ class CartController extends AbstractController
 
         if($id > 0 && $quantity > 0) {
 
-            $product = $entityManager->getRepository(Product::class)->findOneBy(['id' => $id]);
-            $price = $priceRepository->findCurrentPrice($product);
+            $product = $productRepository->findOneWithEntitiesBy(['id' => $id]);
 
-            if(isset($cart['items'][$id]) && is_array($cart['items'][$id])) {
-                $quantity += $cart['items'][$id]['quantity'];
+            if($product != null) {
+                
+                $price = $priceRepository->findCurrentPrice($product);
+                $image = null;
+
+                foreach($product->getFiles() as $file) {
+                    $host = null;
+                    switch($file->getSource()) {
+                        case 'local_cdn':
+                        default: {
+                            // THIS HAS BE CHANGED AND THIS DIRECTORY SET M<UST BE TAKEN FROM services.yaml !!!!!
+                            $host = '../cdn/';
+                        } break;
+                    }
+        
+                    $file->setUrl($host . $file->getFileName() . '.' . $file->getExtension());
+                    switch($file->getMimeType()) {
+                        case 'image/jpeg':
+                        case 'image/png':
+                        case 'image/gif': {
+                            $file->setSquareThumbnailUrl($host . $file->getFileName() . '_thumb.' . $file->getExtension());
+                            $file->setFixedHeightThumbnailUrl($host . $file->getFileName() . '_thumb_h.' . $file->getExtension());
+                        } break;
+                    }
+                }
+
+                if($product->getFiles() && $product->getDefaultImage() == null) {
+                    foreach($product->getFiles() as $file) {
+                        if(in_array($file->getMimeType(), ["image/jpeg", "image/png", "image/gif"])) {
+                            $image = $file;
+                            break;
+                        }
+                    }
+                }
+                elseif($product->getDefaultImage() != null) {
+                    foreach($product->getFiles() as $file) {
+                        if($file == $product->getDefaultImage()) {
+                            $image = $file;
+                            break;
+                        }
+                    }
+                }
+
+                if(isset($cart['items'][$id]) && is_array($cart['items'][$id])) {
+                    $quantity += $cart['items'][$id]['quantity'];
+                }
+                
+                $cartItem = [];
+                $cartItem['url'] = $image->getUrl();
+                $cartItem['square_thumbnail'] = $image->getSquareThumbnailUrl();
+                $cartItem['fixed_height_thumbnail'] = $image->getFixedHeightThumbnailUrl();
+                $cartItem['url'] = $image->getUrl();
+                $cartItem['name'] = $product->getName();
+                $cartItem['price_net'] = number_format($price->getPrice(), 2, '.', '');
+                $cartItem['price'] = number_format($price->getPrice() + $price->getPrice() * $price->getTax()->getRate(), 2, '.', '');
+                $cartItem['total_net'] = number_format($cartItem['price_net'] * $quantity, 2, '.', '');
+                $cartItem['total'] = number_format($cartItem['price'] * $quantity, 2, '.', '');
+                $cartItem['quantity'] = $quantity;
+
+                $cart['items'][$id] = $cartItem;
+
             }
-            
-            $cartItem = [];
-            $cartItem['name'] = $product->getName();
-            $cartItem['price_net'] = number_format($price->getPrice(), 2, '.', '');
-            $cartItem['price'] = number_format($price->getPrice() + $price->getPrice() * $price->getTax()->getRate(), 2, '.', '');
-            $cartItem['total_net'] = number_format($cartItem['price_net'] * $quantity, 2, '.', '');
-            $cartItem['total'] = number_format($cartItem['price'] * $quantity, 2, '.', '');
-            $cartItem['quantity'] = $quantity;
-
-            $cart['items'][$id] = $cartItem;
 
         }
 

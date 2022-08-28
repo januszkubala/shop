@@ -97,7 +97,7 @@ $("table.table-hover").on("click", "[data-href]", function() {
                     <tr>
                         <th class="ps-0">{% trans %}Value in this product{% endtrans %}</th>
                         {% set productTaxValue = price.price * price.tax.rate %}
-                        <td>{{ productTaxValue | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+                        <td>{{ productTaxValue | format_currency(currency, locale = locale) }}</td>
                     </tr>
                 </tbody>
                 </table>
@@ -129,21 +129,21 @@ $("table.table-hover").on("click", "[data-href]", function() {
         {% for price in product.price %}
         <tr data-href="/dashboard/products/product/{{ product.id }}/prices/{{ price.id }}/edit">
             <td>{{ price.date | date('d.m.Y') }}</td>
-            <td>{{ price.price | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+            <td>{{ price.price | format_currency(currency, locale = locale) }}</td>
             <td>
             {% if price.previousPrice != null %}
-            {{ price.previousPrice | format_currency(configuration.currency, locale = configuration.locale) }}
+            {{ price.previousPrice | format_currency(currency, locale = locale) }}
             {% endif %}
             </td>
             <td>{{ price.tax.rate * 100 }}%</td>
             <td>
             {% set grossPrice = price.price + price.price * price.tax.rate %}
-            {{ grossPrice | format_currency(configuration.currency, locale = configuration.locale) }}
+            {{ grossPrice | format_currency(currency, locale = locale) }}
             </td>
             <td>
             {% if price.previousPrice != null %}
                 {% set previousPrice = price.previousPrice + price.previousPrice * price.tax.rate %}
-                {{ previousPrice | format_currency(configuration.currency, locale = configuration.locale) }}
+                {{ previousPrice | format_currency(currency, locale = locale) }}
             {% endif %}
             </td>
             <td>

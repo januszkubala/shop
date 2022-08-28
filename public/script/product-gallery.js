@@ -1,10 +1,20 @@
 // **************************************************************************
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Photo gallery
+// Snapped.js - JavaScript Media Viewer
 // © 2022 Janusz Kubala
 // Version 1.0
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // **************************************************************************
+
+// Stuff to do before release to public:
+// - add closing the gallery when clicked outside its area
+// - improve mobile appearance
+// - swiping files
+// - arrows for navigation
+// - tabs separating images and videos
+// - video support
+// - SVG support and perhaps some other image formats except JPEG, PNG and GIF
+
 
 document.querySelectorAll(".media-gallery").forEach(gallery => {
 
@@ -196,26 +206,104 @@ function showFile(modal, src, files, title, description) {
 
     modal.style.display = "block"
 
-    let modalGrid = document.createElement("div")
-    modalGrid.classList.add("modal-grid")
-    modal.appendChild(modalGrid)
+    let modalBody = modal.querySelector(".modal-body")
+    let modalGrid = modal.querySelector(".modal-grid")
+    let modalBar = modal.querySelector(".modal-bar")
+    let modalClose = modal.querySelector(".modal-close")
 
-    let modalContent = document.createElement("div")
-    modalContent.classList.add("modal-content")
-    modalGrid.appendChild(modalContent)
+    if(modalBody == null) {
 
-    let modalContentView = document.createElement("div")
-    modalContentView.classList.add("modal-content-view")
-    modalContent.appendChild(modalContentView)
+        modalBody = document.createElement("div")
+        modalBody.classList.add("modal-body")
+        modal.appendChild(modalBody)
 
-    let modalContentDescription = document.createElement("div")
-    modalContentDescription.classList.add("modal-content-description")
-    modalContentDescription.textContent = "Foobar"
-    modalContent.appendChild(modalContentDescription)
+        modalBar = document.createElement("div")
+        modalBar.classList.add("modal-bar")
+        modalBody.appendChild(modalBar)
+        
+        modalClose = document.createElement("button")
+        modalClose.classList.add("modal-close")
+        modalBar.appendChild(modalClose)
 
-    let modalMenu = document.createElement("div")
-    modalMenu.classList.add("modal-menu")
-    modalGrid.appendChild(modalMenu)
+        modalGrid = document.createElement("div")
+        modalGrid.classList.add("modal-grid")
+        modalBody.appendChild(modalGrid)
+
+        modalClose.addEventListener("click", (e) => {
+            closeGallery(modal)
+        })
+    
+    }
+
+    let modalContent = modal.querySelector(".modal-content")
+    
+    if(modalContent == null) {
+
+        modalContent = document.createElement("div")
+        modalContent.classList.add("modal-content")
+        modalGrid.appendChild(modalContent)
+
+    }
+
+    let modalContentView = modal.querySelector(".modal-content-view")
+
+    if(modalContentView == null) {
+
+        modalContentView = document.createElement("div")
+        modalContentView.classList.add("modal-content-view")
+        modalContent.appendChild(modalContentView)
+
+    }
+
+    let modalContentDescription = modal.querySelector(".modal-content-description")
+
+    if(modalContentDescription == null) {
+
+        modalContentDescription = document.createElement("div")
+        modalContentDescription.classList.add("modal-content-description")
+        modalContentDescription.textContent = "Foobar"
+        modalContent.appendChild(modalContentDescription)
+
+    }
+
+    let modalMenu = modal.querySelector(".modal-menu")
+    let imagesThumbnails = document.querySelector(".media-thumbnails-images")
+
+    if(modalMenu == null) {
+        
+        let modalMenu = document.createElement("div")
+        modalMenu.classList.add("modal-menu")
+        modalGrid.appendChild(modalMenu)
+
+        imagesThumbnails = document.createElement("div")
+        imagesThumbnails.classList.add("media-thumbnails-images")
+        modalMenu.appendChild(imagesThumbnails)
+    
+        files.forEach(file => {
+
+            let fileThumbnailLink = document.createElement("a")
+            fileThumbnailLink.classList.add("media-item")
+            fileThumbnailLink.dataset.title = file.title
+            fileThumbnailLink.dataset.description = file.description
+            fileThumbnailLink.href = file.file
+    
+            let fileThumbnail = document.createElement("img")
+            fileThumbnail.src = file.src
+            fileThumbnailLink.appendChild(fileThumbnail)
+    
+            imagesThumbnails.appendChild(fileThumbnailLink)
+    
+    
+            fileThumbnailLink.addEventListener("click", (e) => {
+                e.preventDefault()
+    
+                showFile(modal, file.file, files, file.title, file.description)
+    
+            })
+    
+        })
+
+    }
 
     modalContentView.style.backgroundImage = "url('" + src +"')"
     
@@ -239,27 +327,13 @@ function showFile(modal, src, files, title, description) {
     }
 
     if(title != null || description != null) {
-        modalContentDescription.style.padding = "2rem"
+        modalContentDescription.style.padding = "0rem 1rem 1rem"
     }
 
-    let imagesThumbnails = document.createElement("div")
-    imagesThumbnails.classList.add("media-thumbnails-images")
-    modalMenu.appendChild(imagesThumbnails)
+}
 
-    files.forEach(file => {
+function closeGallery(modal) {
 
-        let fileThumbnailLink = document.createElement("a")
-        fileThumbnailLink.classList.add("media-item")
-        fileThumbnailLink.dataset.title = file.title
-        fileThumbnailLink.dataset.description = file.description
-        fileThumbnailLink.href = file.file
-
-        let fileThumbnail = document.createElement("img")
-        fileThumbnail.src = file.src
-        fileThumbnailLink.appendChild(fileThumbnail)
-
-        imagesThumbnails.appendChild(fileThumbnailLink)
-
-    })
+    modal.style.display = "none"
 
 }

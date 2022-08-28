@@ -68,6 +68,49 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
 
+    public function findFilteredUsers($filters): array
+    {
+
+        $queryBuilder = $this->createQueryBuilder('u');
+
+        if($filters['query'] != null) {
+
+            $queryKeywords = explode(' ', $filters['query']);
+            $keywords = [];
+    
+            foreach($queryKeywords as $keyword) {
+                if(strlen(trim($keyword)) > 2) {
+                    $keywords[] = trim($keyword);
+                }
+            }
+
+            if(count($keywords) > 0) {
+    
+                $i = 0;
+                foreach ($keywords as $keyword) {
+                    if($i == 0){
+                        $queryBuilder
+                            ->andWhere('u.first_name LIKE :keyword_' . $i . ' OR u.last_name LIKE :keyword_' . $i);
+                    }
+                    else{
+                        $queryBuilder
+                            ->orWhere('u.first_name LIKE :keyword_' . $i . ' OR u.last_name LIKE :keyword_' . $i);
+                    }
+                    $queryBuilder
+                        ->setParameter(':keyword_' . $i, '%' . $keyword . '%');
+                    $i++;
+                }
+            }
+        }
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult()
+        ;
+
+    }
+
+
 
 
 //    /**

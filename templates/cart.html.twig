@@ -2,9 +2,7 @@
     <div class="container py-2 px-5">
         <div class="row">
             <div class="col-9 shopping-cart"></div>
-            <div class="col-3">
-                <a class="btn btn-warning w-100" href="/checkout">{% trans %}Checkout{% endtrans %}</a>
-            </div>
+            <div class="col-3 shopping-cart-checkout"></div>
         </div>
     </div>
 </div>
@@ -13,27 +11,38 @@
 
 function updateCart() {
 
-    var cartContainer = $(".shopping-cart")
+    let cartContainer = $(".shopping-cart")
+    let cartCheckout = $(".shopping-cart-checkout")
 
     $.ajax({
         method: "GET",
         url: "/api/cart/get",
         success: function(response) {
 
-            var json = JSON.parse(JSON.stringify(response))
+            let json = JSON.parse(JSON.stringify(response))
 
             cartContainer.empty()
 
             if(typeof json.items !== "undefined" && Object.keys(json.items).length > 0) {
 
-                for(var itemId in json.items) {
+                for(let itemId in json.items) {
 
-                    var item = json.items[itemId]
+                    let item = json.items[itemId]
 
-                    var newItem = `
+                    let newItem = `
                     <div class="row align-items-center mb-2">
                         <div class="d-none d-lg-flex col-lg-1">
-                            <div class="bg-light rounded img-card-top ratio ratio-1x1"></div>
+                            `
+                    
+                    if(item['fixed_height_thumbnail'] != null) {
+
+                        newItem += `
+                            <div class="bg-light rounded item-image ratio ratio-1x1" style="background-image:url('${item['fixed_height_thumbnail']}')"></div>
+                        `
+
+                    }
+
+                    newItem += `
                         </div>
 
                         <div class="col-12 col-lg-4">
@@ -44,7 +53,7 @@ function updateCart() {
                             <hr>
                         </div>
 
-                        <div class="col-2 col-lg-2 text-end">
+                        <div class="col-2 col-lg-2">
                             ${item['price']}
                         </div>
 
@@ -56,7 +65,7 @@ function updateCart() {
                             </div>
                         </div>
 
-                        <div class="col-2 col-lg-2 text-end">
+                        <div class="col-2 col-lg-2">
                             ${item['total']}
                         </div>
 
@@ -71,26 +80,27 @@ function updateCart() {
 
                 }
 
-                var totals = `
-
-                    <hr>
-
-                    <div class="row align-items-center mb-2">
-
-                        <div class="col-9 text-end">
-                            {% trans %}Total{% endtrans %}
-                        </div>
-
-                        <div class="col-2 text-end">
-                            ${json.totals['value']}
-                        </div>
-
-                        <div class="col-1"></div>
-
+                let checkout = `
+                    <table class="table table-borderless table-sm mb-3 text-light small">
+                    <tr>
+                        <th colspan="2">{% trans %}Your order summary{% endtrans %}</th>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">{% trans %}Total{% endtrans %}</th>
+                        <td>${json.totals['value']}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">{% trans %}Items in cart{% endtrans %}</th>
+                        <td>${json.totals['quantity']}</td>
+                    </tr>
+                    </table>
+                    <div>
+                        <a class="btn btn-success" style="letter-spacing:.075rem" href="/checkout"><b class="text-uppercase small">{% trans %}Checkout{% endtrans %}</b><i class="fa-solid fa-caret-right fa-fw"></i></a>
                     </div>
                 `
 
-                cartContainer.append(totals)
+                cartCheckout.empty()
+                cartCheckout.append(checkout)
 
             }
         }

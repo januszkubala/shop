@@ -3,6 +3,10 @@ twig:
     paths:
         '%kernel.project_dir%/templates': ~
         '%kernel.project_dir%/documents': 'templates'
+    globals:
+        timezone: '%timezone%'
+        locale: '%locale%'
+        currency: '%currency%'
 
 when@test:
     twig:

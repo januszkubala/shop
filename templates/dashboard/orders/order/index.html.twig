@@ -63,35 +63,35 @@ $("table.table-hover").on("click", "[data-href]", function() {
             <table class="table table-sm">
             <tbody>
             <tr>
-                <td class="ps-0">{% trans %}Date{% endtrans %}</td>
+                <th class="ps-0">{% trans %}Date{% endtrans %}</th>
                 <td>{{ order.date | date('d.m.y H:i') }}</td>
             </tr>
             <tr>
-                <td class="ps-0">{% trans %}Order number{% endtrans %}</td>
+                <th class="ps-0">{% trans %}Order number{% endtrans %}</th>
                 <td>{{ order.id }}</td>
             </tr>
             <tr>
-                <td class="ps-0">{% trans %}Current status{% endtrans %}</td>
+                <th class="ps-0">{% trans %}Current status{% endtrans %}</th>
                 <td>{% include 'chunks/order-status.html.twig' %}</td>
             </tr>
             <tr>
-                <td class="ps-0">{% trans %}Net value{% endtrans %}</td>
-                <td>{{ order.netAmount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+                <th class="ps-0">{% trans %}Net value{% endtrans %}</th>
+                <td>{{ order.netAmount | format_currency(currency, locale = locale) }}</td>
             </tr>
             <tr>
-                <td class="ps-0">{% trans %}Taxes{% endtrans %}</td>
-                <td>{{ order.taxAmount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+                <th class="ps-0">{% trans %}Taxes{% endtrans %}</th>
+                <td>{{ order.taxAmount | format_currency(currency, locale = locale) }}</td>
             </tr>
             <tr>
-                <td class="ps-0">{% trans %}Gross value{% endtrans %}</td>
-                <td>{{ order.amount | format_currency(configuration.currency, locale = configuration.locale) }}</td>
+                <th class="ps-0">{% trans %}Gross value{% endtrans %}</th>
+                <td>{{ order.amount | format_currency(currency, locale = locale) }}</td>
             </tr>
             <tr>
-                <td class="ps-0">{% trans %}Items ordered{% endtrans %}</td>
+                <th class="ps-0">{% trans %}Items ordered{% endtrans %}</th>
                 <td>{{ order.quantity }}</td>
             </tr>
             <tr>
-                <td class="ps-0">{% trans %}Reference{% endtrans %}</td>
+                <th class="ps-0">{% trans %}Reference{% endtrans %}</th>
                 <td class="text-uppercase small">{{ order.ref }}</td>
             </tr>
             </table>
@@ -153,11 +153,11 @@ $("table.table-hover").on("click", "[data-href]", function() {
                 {{ component.isbn }}
             {% endif %}
             </td>
-            <td>{{ component.netPrice }}</td>
+            <td>{{ component.netPrice | format_currency(currency, locale = locale) }}</td>
             <td>{{ component.taxRate * 100 }}%</td>
-            <td>{{ component.price }}</td>
+            <td>{{ component.price | format_currency(currency, locale = locale) }}</td>
             <td>{{ component.quantity }}</td>
-            <td>{{ component.amount }}</td>
+            <td>{{ component.amount | format_currency(currency, locale = locale) }}</td>
         </tr>
         {% endfor %}
         </tbody>

@@ -95,12 +95,14 @@ class ProductRepository extends ServiceEntityRepository
             ->addSelect('s')
             ->addSelect('pv')
             ->addSelect('po')
+            ->addSelect('f')
             ->leftJoin('p.user', 'u')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.price', 'pr')
             ->leftJoin('p.stocks', 's')
             ->leftJoin('p.propertyValues', 'pv')
             ->leftJoin('pv.property', 'po')
+            ->leftJoin('p.file', 'f')
         ;
         
             foreach($where as $field => $value) {

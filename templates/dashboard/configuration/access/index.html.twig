@@ -1,0 +1,108 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}Access Management / Settings{% endblock %}
+
+
+{% block filters %}
+
+    <div class="card border-0 bg-secondary rounded bg-opacity-10 mb-5">
+
+        <h6 class="text-uppercase bg-dark text-light rounded p-2">{% trans %}Filters{% endtrans %}</h6>
+
+        <div class="card-body">
+
+            {{ form_start(filtersForm) }}
+
+            <div class="row">
+
+                <div class="col-4">
+                    {{ form_widget(filtersForm.query, {attr: {class: 'form-control'}}) }}
+                    
+                    {% if filtersForm.query.vars.help is not null %}
+                    <div class="form-text">
+                        {{ form_help(filtersForm.query) }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-4">
+                    {{ form_widget(filtersForm.email, {attr: {class: 'form-control'}}) }}
+                    
+                    {% if filtersForm.email.vars.help is not null %}
+                    <div class="form-text">
+                        {{ form_help(filtersForm.email) }}
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <div class="my-3 text-end">
+
+                <a href="/dashboard/configuration/access?filters=reset" class="me-3 text-decoration-none"><i class="fa-solid fa-times"></i> {% trans %}Reset filters{% endtrans %}</a>
+
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-filter"></i> {% trans %}Search{% endtrans %}</button>
+                {% do filtersForm.submit.setRendered %}
+
+            </div>
+
+            {{ form_end(filtersForm) }}
+
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block sidemenu %}
+
+    <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+        <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/configuration">{% trans %}Return{% endtrans %}</a>
+    </div>
+
+{% endblock %}
+
+
+{% block body %}
+
+<h1>{% trans %}Access Management{% endtrans %}</h1>
+<hr>
+
+{{ block('filters') }}
+
+{% if users is not null %}
+
+    <table class="table table-striped w-100 table-hover">
+
+        <thead>
+        <tr class="bg-success text-light">
+            <th>{% trans %}First name{% endtrans %}</th>
+            <th>{% trans %}Last name{% endtrans %}</th>
+            <th>{% trans %}Email{% endtrans %}</th>
+            <th>{% trans %}Phone{% endtrans %}</th>
+            <th>{% trans %}Date of registration{% endtrans %}</th>
+            <th>{% trans %}Account type{% endtrans %}</th>
+            <th>{% trans %}Options{% endtrans %}</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for user in users %}
+        <tr data-href="/dashboard/users/user/{{ user.id }}">
+            <td>{{ user.firstName }}</td>
+            <td>{{ user.lastName }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.phone }}</td>
+            <td>{{ user.dateOfRegistration | date('d.m.y H:i') }}</td>
+            <td>{#{ user.roles }#}</td>
+            <td></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+
+    </table>
+
+{% endif %}
+
+{% endblock %}
