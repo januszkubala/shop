@@ -2,12 +2,12 @@
 
 namespace App\Entity;
 
-use App\Repository\OrderComponentRepository;
+use App\Repository\SaleComponentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: OrderComponentRepository::class)]
-class OrderComponent
+#[ORM\Entity(repositoryClass: SaleComponentRepository::class)]
+class SaleComponent
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -21,9 +21,9 @@ class OrderComponent
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
 
-    #[ORM\ManyToOne(inversedBy: 'orderComponents')]
+    #[ORM\ManyToOne(inversedBy: 'saleComponents')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Order $parent = null;
+    private ?Sale $parent = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 14, scale: 2)]
     private ?string $net_price = null;
@@ -93,12 +93,12 @@ class OrderComponent
         return $this;
     }
 
-    public function getParent(): ?Order
+    public function getParent(): ?Sale
     {
         return $this->parent;
     }
 
-    public function setParent(?Order $parent): self
+    public function setParent(?Sale $parent): self
     {
         $this->parent = $parent;
 

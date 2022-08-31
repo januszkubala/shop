@@ -1,0 +1,121 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}{% trans %}Stock{% endtrans %} | {{ product.name }}{% endblock %}
+
+{% block sidemenu %}
+
+        <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+            <a class="btn btn-dark btn-sm p-2 text-start" href="javascript:void(0)" onclick="getExcel('stock-spreadsheet', {{ product.id }})">
+                {% trans %}Export to Excel{% endtrans %}
+                <i class="fa-solid fa-file-excel float-end fa-fw mt-1"></i>
+            </a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/stock/create">{% trans %}Add stock change{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}">{% trans %}Return{% endtrans %}</a>
+        </div>
+
+<script>
+
+function redirectToFile(downloadWindow, url) {
+
+    downloadWindow.close()
+
+    window.location.href = url
+
+}
+
+function getExcel(document, id) {
+    
+    var downloadWindow
+
+    let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=620,height=400,left=50,top=50`
+
+    downloadWindow = window.open('/document/' + document + '/' + id, '{% trans %}Excel Spreadsheet{% endtrans %}', params)
+
+}
+
+function getDocument(document, id) {
+
+    let params = "scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=1120,height=680,left=50,top=50"
+
+    open("/document/" + document + "?id=" + id, "{% trans %}PDF Document{% endtrans %}", params)
+
+}
+
+</script>
+
+{% endblock %}
+
+
+{% block body %}
+
+    {% set title = 'Stock'|trans %}
+    {% include 'chunks/product-dashboard-header.html.twig' %}
+
+        <div class="row">
+        <div class="col-xl-4">
+
+            <h6>{% trans %}Current stock{% endtrans %}</h6>
+            
+            <table class="table table-sm">
+            <tbody>
+            <tr>
+                <th class="ps-0">{% trans %}Level{% endtrans %}</th>
+                <td class="text-end">{{ product.stock }}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Normal level{% endtrans %}</th>
+                <td class="text-end">{{ product.normalLevel }}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Warning level{% endtrans %}</th>
+                <td class="text-end">{{ product.warningLevel }}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Critical level{% endtrans %}</th>
+                <td class="text-end">{{ product.criticalLevel }}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Level indicator{% endtrans %}</th>
+                <td class="text-end">{% include '/chunks/product-stock-indicator.html.twig' %}</td>
+            </tr>
+            </tbody>
+            </table>
+
+        </div>
+        </div>
+
+        <hr>
+
+        <h6>{% trans %}Stock history{% endtrans %}</h6>
+
+        <table class="table table-striped w-100 table-hover">
+        <thead>
+        <tr class="bg-success text-light">
+            <th>{% trans %}Date entered{% endtrans %}</th>
+            <th>{% trans %}Stock change{% endtrans %}</th>
+            <th>{% trans %}Updated by{% endtrans %}</th>
+            <th>{% trans %}Description{% endtrans %}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for stock in product.stocks %}
+        <tr>
+            <td>{{ stock.date | date('d.m.Y H:i') }}</td>
+            
+            {% if stock.stockChange < 0 %}
+            <td><i class="fa-solid fa-caret-down text-danger fa-fw"></i> <b>{{ stock.stockChange }}</b></td>
+            {% else %}
+            <td><i class="fa-solid fa-caret-up text-success fa-fw"></i> <b>{{ stock.stockChange }}</b></td>
+            {% endif %}
+            
+            <td>{{ stock.user.firstName }} {{ stock.user.lastName }}</td>
+            <td>{{ stock.changesDescription }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+
+        <p class="small text-muted text-end">{% trans %}Stock history does not include changes from sales.{% endtrans %}</p>
+
+{% endblock %}

@@ -3,8 +3,8 @@
 namespace App\Controller;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-use App\Repository\OrderRepository;
-use App\Repository\OrderComponentRepository;
+use App\Repository\SaleRepository;
+use App\Repository\SaleComponentRepository;
 use App\Repository\ProductRepository;
 use App\Repository\PriceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,16 +28,16 @@ class DocumentController extends AbstractController
         $configuration = $parameters->all();
     }
 
-    #[Route('/document/order-sheet', name: 'app_document_order_sheet')]
-    public function orderSheetPDF(Request $request, OrderRepository $orderRepository, OrderComponentRepository $orderComponentRepository): Response
+    #[Route('/document/sale-sheet', name: 'app_document_sale_sheet')]
+    public function saleSheetPDF(Request $request, SaleRepository $saleRepository, SaleComponentRepository $saleComponentRepository): Response
     {
 
-        $order = $orderRepository->findOneBy(['id' => (int) $request->query->get('id')]);
+        $sale = $saleRepository->findOneBy(['id' => (int) $request->query->get('id')]);
         $items = [];
-        $items = $orderComponentRepository->findBy(['parent' => $order]);
+        $items = $saleComponentRepository->findBy(['parent' => $sale]);
 
-        $html = $this->render('@templates/order_sheet.html.twig', [
-            'order' => $order,
+        $html = $this->render('@templates/sale_sheet.html.twig', [
+            'sale' => $sale,
             'items' => $items
         ]);
         
@@ -48,7 +48,7 @@ class DocumentController extends AbstractController
         
         
         return new Response(
-            $dompdf->stream('OS-' . $order->getId() . '.pdf', ['Attachment' => false]),
+            $dompdf->stream('OS-' . $sale->getId() . '.pdf', ['Attachment' => false]),
             200,
             array(
                 'Content-Type' => 'application/pdf'
@@ -57,8 +57,8 @@ class DocumentController extends AbstractController
         
     }
 
-    #[Route('/document/orders-spreadsheet', name: 'app_document_orders_spreadsheet')]
-    public function ordersSpreadsheetXLSX(Request $request, OrderRepository $orderRepository, TranslatorInterface $translator): Response
+    #[Route('/document/sales-spreadsheet', name: 'app_document_sales_spreadsheet')]
+    public function salesSpreadsheetXLSX(Request $request, SaleRepository $saleRepository, TranslatorInterface $translator): Response
     {
 
         if($request->query->get('file') == true) {
@@ -71,9 +71,9 @@ class DocumentController extends AbstractController
                 'dateAnd' => null
             ];
 
-            if(!empty($request->cookies->get('filters_orders'))) {
+            if(!empty($request->cookies->get('filters_sales'))) {
 
-                $filters = json_decode(base64_decode($request->cookies->get('filters_orders')), true);
+                $filters = json_decode(base64_decode($request->cookies->get('filters_sales')), true);
 
                 if($filters['dateBetween'] != null) {
                     $filters['dateBetween'] = new \DateTime($filters['dateBetween']['date']);
@@ -88,12 +88,12 @@ class DocumentController extends AbstractController
             
             if($filters['query'] != null || $filters['grossValueBetween'] != null || $filters['grossValueAnd'] != null || $filters['dateBetween'] != null || $filters['dateAnd'] != null) {
 
-                $orders = $orderRepository->findFilteredOrders($filters);
+                $sales = $saleRepository->findFilteredSales($filters);
             
             }
             else {
 
-                $orders = $orderRepository->findAllOrders();
+                $sales = $saleRepository->findAllSales();
 
             }
 
@@ -158,7 +158,7 @@ class DocumentController extends AbstractController
             
             $row = 2;
 
-            foreach($orders as $order) {
+            foreach($sales as $sale) {
 
                 $sheet
                     ->getStyle('D' . $row, 'F' . $row)
@@ -173,21 +173,21 @@ class DocumentController extends AbstractController
                 ;
 
                 $sheet->fromArray([
-                    $order->getId(),
-                    join(' ', [$order->getFirstName(), $order->getLastName()]),
-                    $order->getQuantity(),
-                    $order->getNetAmount(),
-                    $order->getTaxAmount(),
-                    $order->getAmount(),
-                    $order->getDate(),
-                    $order->getStatus()
+                    $sale->getId(),
+                    join(' ', [$sale->getFirstName(), $sale->getLastName()]),
+                    $sale->getQuantity(),
+                    $sale->getNetAmount(),
+                    $sale->getTaxAmount(),
+                    $sale->getAmount(),
+                    $sale->getDate(),
+                    $sale->getStatus()
                 ],
                 null,
                 'A' . $row);
 
-                $sheet->setCellValue('G' . $row, \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($order->getDate()));
+                $sheet->setCellValue('G' . $row, \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($sale->getDate()));
 
-                switch($order->getStatus()) {
+                switch($sale->getStatus()) {
 
                     case 'pending': {
                         $sheet->setCellValue('H' . $row, $translator->trans('Pending / awaiting payment'));
@@ -258,12 +258,12 @@ class DocumentController extends AbstractController
     }
 
     #[Route('/document/prices-spreadsheet/{id}', name: 'app_document_prices_spreadsheet')]
-    public function pricesSpreadsheetXLSX(Request $request, PriceRepository $priceRepository, ProductRepository $ProductRepository, TranslatorInterface $translator): Response
+    public function pricesSpreadsheetXLSX(Request $request, PriceRepository $priceRepository, ProductRepository $productRepository, TranslatorInterface $translator): Response
     {
         
         if($request->query->get('file') == true) {
 
-            $product = $ProductRepository->findOneBy(['id' => $request->get('id')]);
+            $product = $productRepository->findOneBy(['id' => $request->get('id')]);
             $prices = $priceRepository->findBy(['product' => $request->get('id')]);
 
             $headers = [
@@ -400,6 +400,147 @@ class DocumentController extends AbstractController
             
             $response->headers->set('Content-Type', 'application/vnd.ms-excel');
             $response->headers->set('Content-Disposition', 'attachment;filename="Prices ' . $product->getName() . '.xlsx"');
+            $response->headers->set('Cache-Control','max-age=0');
+
+            return $response;
+
+        }
+        else {
+
+            return $this->render('download/index.html.twig', [
+                'configuration' => $this->configuration
+            ]);
+
+        }
+
+
+        
+    }
+
+    #[Route('/document/stock-spreadsheet/{id}', name: 'app_document_prices_spreadsheet')]
+    public function stockSpreadsheetXLSX(Request $request, PriceRepository $priceRepository, ProductRepository $productRepository, TranslatorInterface $translator): Response
+    {
+        
+        if($request->query->get('file') == true) {
+
+            $product = $productRepository->findOneWithEntitiesBy(['id' => $request->get('id')]);
+
+            $headers = [
+                $translator->trans('Stock change ID'),
+                $translator->trans('Date entered'),
+                $translator->trans('Stock level change'),
+                $translator->trans('Entered by'),
+                $translator->trans('Description')
+            ];
+            
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            $sheet
+                ->getStyle('A1')
+                ->getFont()
+                ->setBold(true)
+                ->setSize(16);
+            
+            $sheet
+                ->getStyle('A')
+                ->getAlignment()
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            
+            $sheet
+                ->getRowDimension(1)
+                ->setRowHeight(30);
+
+            $sheet
+                ->setCellValue('A1', $product->getName())
+                ->mergeCells('A1:E1');
+
+            $styleArray = [
+                'borders' => [
+                    'outline' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => [
+                            'rgb' => '000000'
+                        ]
+                    ]
+                ],
+                'font' => [
+                    'bold' => true,
+                    'color' => [
+                        'rgb' => 'FFFFFF'
+                    ]
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => [
+                        'rgb' => '198754'
+                    ]
+                ],
+                'alignment' => [
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                ]
+            ];
+
+            $sheet
+                ->getRowDimension(3)
+                ->setRowHeight(26)
+            ;
+
+            $sheet
+                ->getStyle('A3:E3')
+                ->applyFromArray($styleArray)
+            ;
+            
+            foreach($sheet->getColumnIterator() as $column) {
+
+                $sheet
+                    ->getColumnDimension($column->getColumnIndex())
+                    ->setAutoSize(true)
+                ;
+            }
+
+            $sheet->fromArray($headers, null, 'A3');
+            
+            $row = 4;
+
+            foreach($product->getStocks() as $stock) {
+
+                $sheet
+                    ->getStyle('C' . $row)
+                    ->getNumberFormat()
+                    ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1)
+                ;
+
+                $sheet
+                    ->getStyle('B' . $row)
+                    ->getNumberFormat()
+                    ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY)
+                ;
+
+                $sheet->fromArray([
+                    $stock->getId(),
+                    $stock->getDate(),
+                    $stock->getStockChange(),
+                    join(' ', [$stock->getUser()->getFirstName(), $stock->getUser()->getLastName()]),
+                    $stock->getChangesDescription()
+                ],
+                null,
+                'A' . $row);
+                
+                $row++;
+
+            }
+
+            $writer = new Xlsx($spreadsheet);
+
+            $response =  new StreamedResponse(
+                function () use ($writer) {
+                    $writer->save('php://output');
+                }
+            );
+            
+            $response->headers->set('Content-Type', 'application/vnd.ms-excel');
+            $response->headers->set('Content-Disposition', 'attachment;filename="Stock ' . $product->getName() . '.xlsx"');
             $response->headers->set('Cache-Control','max-age=0');
 
             return $response;

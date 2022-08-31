@@ -1,6 +1,16 @@
-{{ address.street }}<br>
-{{ address.city }} {{ address.postalCode }}<br>
-{% if address.region != null %}
-    {{ address.region }}<br>
+{% if address.street is null and address.city is null and address.postalCode is null and address.region is null and address.country is null %}
+
+    <span class="text-muted">{% trans %}Address not available{% endtrans %}</span>
+
+{% else %}
+
+    {{ address.street }}<br>
+    {{ address.city }} {{ address.postalCode }}<br>
+    {% if address.region != null %}
+        {{ address.region }}<br>
+    {% endif %}
+    {% if address.country is not null %}
+        {{ countries[address.country] }} ({{ address.country }})
+    {% endif %}
+
 {% endif %}
-{{ countries[address.country] }} ({{ address.country }})

@@ -1,0 +1,94 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}{% trans %}Add stock{% endtrans %} | {{ product.name }}{% endblock %}
+
+{% block sidemenu %}
+
+        <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}">{% trans %}Return{% endtrans %}</a>
+        </div>
+
+<script>
+
+let change = document.getElementById("stock_stockChange");
+
+change.addEventListener("keyup", (e) => {
+
+    if ((e.which < 48 && e.which != 45 && e.which != 8) || e.which > 57) {
+        e.preventDefault()
+    }
+    else {
+
+        let currentLevel = parseInt(document.getElementById("current-level").innerText)
+        let newLevel = parseInt(change.value) + currentLevel
+
+        if(!isNaN(newLevel)) {
+            document.getElementById("new-level").innerText = newLevel
+        }
+        else {
+            document.getElementById("new-level").innerText = "-"
+        }
+    }
+
+})
+
+</script>
+
+{% endblock %}
+
+
+{% block body %}
+
+    {% set title = 'Add stock'|trans %}
+    {% include 'chunks/product-dashboard-header.html.twig' %}
+
+    {{ form_start(stockForm) }}
+    
+    <p class="mb-3">
+    <b>{% trans %}Current level:{% endtrans %}</b> <span id="current-level">{{ product.stock }}</span>
+    /
+    <b>{% trans %}level after update:{% endtrans %}</b> <span id="new-level">{{ product.stock }}</span>
+    </p>
+
+    <hr>
+
+    <div class="row mb-3">
+
+        <div class="col-8">
+
+            {{ form_label(stockForm.stockChange) }}
+            {{ form_widget(stockForm.stockChange, {attr: {class: 'form-control w-25'}}) }}
+
+            {% if stockForm.stockChange.vars.help is not null %}
+            <div class="form-text">
+                {{ form_help(stockForm.stockChange) }}
+            </div>
+            {% endif %}
+        </div>
+    
+    </div>
+
+    <div class="row mb-3">
+
+        <div class="col-8">    
+            {{ form_label(stockForm.changesDescription) }}
+            {{ form_widget(stockForm.changesDescription, {attr: {class: 'form-control', cols: 40, rows: 3}}) }}
+
+            {% if stockForm.changesDescription.vars.help is not null %}
+            <div class="form-text">
+                {{ form_help(stockForm.changesDescription) }}
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div>
+        <button type="submit" class="btn btn-sm btn-success">{% trans %}Update stock{% endtrans %}</button>
+        {% do stockForm.submit.setRendered %}
+    </div>
+
+    {{ form_end(stockForm) }}
+
+{% endblock %}

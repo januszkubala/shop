@@ -28,7 +28,7 @@ class CartController extends AbstractController
 
         if(empty($cart)) {
             $cart = [];
-            $cart['order_ref'] = null;
+            $cart['sale_ref'] = null;
             $cart['items'] = [];
         }
 

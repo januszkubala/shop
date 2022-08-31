@@ -11,7 +11,7 @@
                 <i class="fa-solid fa-file-pdf float-end fa-fw mt-1"></i>
             </a>
             <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/prices">{% trans %}Prices{% endtrans %}</a>
-            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/stocks">{% trans %}Stock{% endtrans %}</a>
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/stock">{% trans %}Stock{% endtrans %}</a>
             <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products/product/{{ product.id }}/edit">{% trans %}Edit product{% endtrans %}</a>
             <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/products">{% trans %}Return{% endtrans %}</a>
         </div>
@@ -33,8 +33,8 @@ function getDocument(document, id) {
 
 {% block body %}
 
-    <h1>{{ product.name }}</h1>
-    <hr>
+    {% set title = 'Product'|trans %}
+    {% include 'chunks/product-dashboard-header.html.twig' %}
 
         <div class="row">
         <div class="col-xl-4">
@@ -62,7 +62,8 @@ function getDocument(document, id) {
                 <th class="ps-0">{% trans %}Stock level{% endtrans %}</th>
                 <td>
                     {{ product.stock }}
-                    <p class="py-0 small"><a href="/dashboard/products/product/{{ product.id }}/stocks">{% trans %}View stock changes{% endtrans %}</a></p>
+                    {% include '/chunks/product-stock-indicator.html.twig' %}
+                    <p class="py-0 small"><a href="/dashboard/products/product/{{ product.id }}/stock">{% trans %}View stock changes{% endtrans %}</a></p>
                 </td>
             </tr>
             <tr>
@@ -118,33 +119,37 @@ function getDocument(document, id) {
 
         <h5>{% trans %}Last 10 orders{% endtrans %}</h5>
 
-        <table class="table table-striped w-100">
+
+    <table class="table table-striped w-100 table-hover">
+
         <thead>
         <tr class="bg-success text-light">
-            <th>{% trans %}Order number{% endtrans %}</th>
-            <th>{% trans %}Order ref{% endtrans %}</th>
+            <th>{% trans %}Order{% endtrans %}</th>
+            <th>{% trans %}Customer{% endtrans %}</th>
             <th>{% trans %}Items ordered{% endtrans %}</th>
             <th>{% trans %}Net value{% endtrans %}</th>
-            <th>{% trans %}Tax rate{% endtrans %}</th>
-            <th>{% trans %}Total{% endtrans %}</th>
-            <th>{% trans %}Status{% endtrans %}</th>
+            <th>{% trans %}Tax value{% endtrans %}</th>
+            <th>{% trans %}Gross value{% endtrans %}</th>
             <th>{% trans %}Date{% endtrans %}</th>
+            <th>{% trans %}Status{% endtrans %}</th>
         </tr>
         </thead>
+
         <tbody>
-        {#% for order in orders %}
-        <tr class="small">
-            <td><a href="/dashboard/orders/order/?id={{ order.id }}" class="text-danger">{{ order.id }}</a></td>
-            <td class="text-uppercase"><a href="/dashboard/orders/order/?id={{ order.id }}" class="text-danger">{{ order.ref }}</a></td>
+        {% for order in orders %}
+        <tr data-href="/dashboard/orders/order/{{ order.id }}">
+            <td>{{ order.id }}</td>
+            <td>{{ order.firstName }} {{ order.lastName }}</td>
             <td>{{ order.quantity }}</td>
-            <td>{{ order.netAmount }}</td>
-            <td>{{ order.taxAmount }}</td>
-            <td>{{ order.amount }}</td>
-            <td></td>
-            <td>{{ order.date | date('d.m.y') }}</td>
+            <td>{{ order.netAmount | format_currency(currency, locale = locale) }}</td>
+            <td>{{ order.taxAmount | format_currency(currency, locale = locale) }}</td>
+            <td>{{ order.amount | format_currency(currency, locale = locale) }}</td>
+            <td>{{ order.date | date('d.m.y H:i') }}</td>
+            <td>{% include 'chunks/order-status.html.twig' %}</td>
         </tr>
-        {% endfor %#}
+        {% endfor %}
         </tbody>
-        </table>
+
+    </table>
 
 {% endblock %}

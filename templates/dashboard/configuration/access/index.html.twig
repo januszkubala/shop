@@ -36,6 +36,16 @@
                     {% endif %}
                 </div>
 
+                <div class="col-4">
+                    {{ form_widget(filtersForm.role, {attr: {class: 'form-select'}}) }}
+                    
+                    {% if filtersForm.role.vars.help is not null %}
+                    <div class="form-text">
+                        {{ form_help(filtersForm.role) }}
+                    </div>
+                    {% endif %}
+                </div>
+
             </div>
 
             <div class="my-3 text-end">
@@ -61,6 +71,19 @@
         <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/configuration">{% trans %}Return{% endtrans %}</a>
     </div>
 
+<script>
+
+$("table.table-hover").on("click", "[data-href]", function() {
+
+    var href = $(this).data("href")
+
+    if(href != null) {
+        window.location.href = href
+    }
+    
+})
+
+</script>
 {% endblock %}
 
 
@@ -83,20 +106,18 @@
             <th>{% trans %}Phone{% endtrans %}</th>
             <th>{% trans %}Date of registration{% endtrans %}</th>
             <th>{% trans %}Account type{% endtrans %}</th>
-            <th>{% trans %}Options{% endtrans %}</th>
         </tr>
         </thead>
 
         <tbody>
         {% for user in users %}
-        <tr data-href="/dashboard/users/user/{{ user.id }}">
+        <tr data-href="/dashboard/configuration/access/{{ user.id }}">
             <td>{{ user.firstName }}</td>
             <td>{{ user.lastName }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.phone }}</td>
             <td>{{ user.dateOfRegistration | date('d.m.y H:i') }}</td>
-            <td>{#{ user.roles }#}</td>
-            <td></td>
+            <td>{% for role in user.roles %}{{ roles[role] }}{% endfor %}</td>
         </tr>
         {% endfor %}
         </tbody>

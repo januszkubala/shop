@@ -19,7 +19,7 @@ class Payment
 
     #[ORM\ManyToOne(inversedBy: 'payments')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Order $allocation = null;
+    private ?Sale $allocation = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 14, scale: 2)]
     private ?string $amount = null;
@@ -71,12 +71,12 @@ class Payment
         return $this;
     }
 
-    public function getAllocation(): ?Order
+    public function getAllocation(): ?Sale
     {
         return $this->allocation;
     }
 
-    public function setAllocation(?Order $allocation): self
+    public function setAllocation(?Sale $allocation): self
     {
         $this->allocation = $allocation;
 

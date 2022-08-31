@@ -3,7 +3,7 @@
 namespace App\Controller;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-use App\Entity\OrderComponent;
+use App\Entity\SaleComponent;
 use App\Entity\Product;
 use App\Entity\File;
 use App\Entity\Price;
@@ -15,12 +15,14 @@ use App\Entity\Category;
 use App\Entity\Stock;
 use App\Entity\Configuration;
 use App\Form\ProductType;
-use App\Form\FilterOrdersType;
+use App\Form\FilterSalesType;
 use App\Form\FilterUsersType;
 use App\Form\ConfigurationRegionalType;
+use App\Form\UserRoleFormType;
+use App\Form\StockType;
 use App\Repository\PropertyRepository;
 use App\Repository\CategoryRepository;
-use App\Repository\OrderRepository;
+use App\Repository\SaleRepository;
 use App\Repository\UserRepository;
 use App\Repository\ProductRepository;
 use App\Repository\PriceRepository;
@@ -39,7 +41,7 @@ class DashboardController extends AbstractController
 {
 
     #[Route('/dashboard/files', name: 'app_dashboard_files')]
-    public function filesIndex(Request $request, OrderRepository $orderRepository): Response
+    public function filesIndex(Request $request, SaleRepository $saleRepository): Response
     {
 
         return $this->render('dashboard/files/index.html.twig', [
@@ -83,6 +85,54 @@ class DashboardController extends AbstractController
 
     }
 
+    #[Route('/dashboard/products/product/{id}/stock/create', name: 'app_dashboard_products_product_stock_create')]
+    public function productStockCreate(Request $request, ProductRepository $productRepository, EntityManagerInterface $entityManager): Response
+    {
+
+        $id = $request->get('id');
+        $product = $productRepository->findOneWithEntitiesBy(['id' => $id]);
+
+        $stock = new Stock();
+        
+        $form = $this->createForm(StockType::class, $stock);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            
+            $product->setStock($product->getStock() + $stock->getStockChange());
+
+            $stock->setUser($this->getUser());
+            $stock->setProduct($product);
+            $stock->setDate(new \DateTime);
+
+            $entityManager->persist($stock);
+            $entityManager->persist($product);
+            $entityManager->flush();
+
+            return $this->redirect('/dashboard/products/product/' . $stock->getId() . '/stock');
+
+        }
+
+        return $this->render('dashboard/products/product/stock/create.html.twig', [
+            'product' => $product,
+            'stockForm' => $form->createView()
+        ]);
+
+    }
+
+    #[Route('/dashboard/products/product/{id}/stock', name: 'app_dashboard_products_product_stock')]
+    public function productStock(Request $request, ProductRepository $productRepository): Response
+    {
+
+        $id = $request->get('id');
+        $product = $productRepository->findOneWithEntitiesBy(['id' => $id]);
+
+        return $this->render('dashboard/products/product/stock/index.html.twig', [
+            'product' => $product
+        ]);
+
+    }
+
     #[Route('/dashboard/products/product/{id}/prices', name: 'app_dashboard_products_product_prices')]
     public function productPrices(Request $request, ProductRepository $productRepository, PriceRepository $priceRepository): Response
     {
@@ -91,7 +141,7 @@ class DashboardController extends AbstractController
 
         $product = $productRepository->findOneWithEntitiesBy(['id' => $id]);
         $price = $priceRepository->findCurrentPrice($product);
-        
+
         return $this->render('dashboard/products/product/prices/index.html.twig', [
             'product' => $product,
             'price' => $price
@@ -100,17 +150,23 @@ class DashboardController extends AbstractController
     }
 
     #[Route('/dashboard/products/product/{id}', name: 'app_dashboard_products_product')]
-    public function product(Request $request, ProductRepository $productRepository, PriceRepository $priceRepository): Response
+    public function product(Request $request, ProductRepository $productRepository, PriceRepository $priceRepository, SaleRepository $saleRepository): Response
     {
 
         $id = $request->get('id');
 
         $product = $productRepository->findOneWithEntitiesBy(['id' => $id]);
         $price = $priceRepository->findCurrentPrice($product);
-        
+
+        // Get last n paid sales with this product
+        $sales = $saleRepository->findLastSalesForProduct($product, 10);
+
+        dd($sales);
+
         return $this->render('dashboard/products/product/index.html.twig', [
             'product' => $product,
-            'price' => $price
+            'price' => $price,
+            'salers' => $sales
         ]);
 
     }
@@ -246,7 +302,7 @@ class DashboardController extends AbstractController
     }
     
     #[Route('/dashboard/users/user/{id}', name: 'app_dashboard_users_user')]
-    public function user(Request $request, UserRepository $userRepository, OrderRepository $orderRepository): Response
+    public function user(Request $request, UserRepository $userRepository, SaleRepository $saleRepository): Response
     {
 
         $earth = new Earth();
@@ -258,12 +314,12 @@ class DashboardController extends AbstractController
 
         $id = $request->get('id');
         $user = $userRepository->findOneBy(['id' => $id]);
-        $orders = $orderRepository->findBy(['user' => $user]);
+        $sales = $saleRepository->findBy(['user' => $user]);
 
         return $this->render('dashboard/users/user/index.html.twig', [
             'user' => $user,
             'countries' => $countries,
-            'orders' => $orders
+            'sales' => $sales
         ]);
 
     }
@@ -288,8 +344,8 @@ class DashboardController extends AbstractController
 
     }
 
-    #[Route('/dashboard/orders/order/{id}/payments', name: 'app_dashboard_orders_order_payments')]
-    public function payment(Request $request, EntityManagerInterface $entityManager, OrderRepository $orderRepository): Response
+    #[Route('/dashboard/sales/sale/{id}/payments', name: 'app_dashboard_sales_sale_payments')]
+    public function payment(Request $request, EntityManagerInterface $entityManager, SalesRepository $saleRepository): Response
     {
 
 
@@ -301,24 +357,24 @@ class DashboardController extends AbstractController
         }
 
         $id = $request->get('id');
-        $order = $orderRepository->findOneBy(['id' => $id]);
+        $sale = $saleRepository->findOneBy(['id' => $id]);
 
         $payments = $entityManager->getRepository(Payment::class)->findBy(
-            ['allocation' => $order->getId()],
+            ['allocation' => $sale->getId()],
             ['id' => 'DESC']
         );
 
 
-        return $this->render('dashboard/orders/order/payments/index.html.twig', [
+        return $this->render('dashboard/sales/sale/payments/index.html.twig', [
             'payments' => $payments,
-            'order' => $order,
+            'sale' => $sale,
             'countries' => $countries
         ]);
 
     }
 
-    #[Route('/dashboard/orders/order/{id}', name: 'app_dashboard_orders_order')]
-    public function order(Request $request, EntityManagerInterface $entityManager, OrderRepository $orderRepository): Response
+    #[Route('/dashboard/sales/sale/{id}', name: 'app_dashboard_sales_sale')]
+    public function sale(Request $request, EntityManagerInterface $entityManager, SalesRepository $saleRepository): Response
     {
 
         $earth = new Earth();
@@ -329,18 +385,18 @@ class DashboardController extends AbstractController
         }
 
         $id = $request->get('id');
-        $order = $orderRepository->findOneBy(['id' => $id]);
+        $sale = $saleRepository->findOneBy(['id' => $id]);
 
         $payments = $entityManager->getRepository(Payment::class)->findBy(
-            ['allocation' => $order->getId()],
+            ['allocation' => $sale->getId()],
             ['id' => 'DESC']
         );
         
-        $components = $entityManager->getRepository(OrderComponent::class)->findBy(['parent' => $order->getId()]);
+        $components = $entityManager->getRepository(SaleComponent::class)->findBy(['parent' => $sale->getId()]);
 
 
-        return $this->render('dashboard/orders/order/index.html.twig', [
-            'order' => $order,
+        return $this->render('dashboard/sales/sale/index.html.twig', [
+            'sale' => $sale,
             'components' => $components,
             'payments' => $payments,
             'countries' => $countries
@@ -348,13 +404,13 @@ class DashboardController extends AbstractController
 
     }
 
-    #[Route('/dashboard/orders', name: 'app_dashboard_orders')]
-    public function ordersIndex(Request $request, OrderRepository $orderRepository): Response
+    #[Route('/dashboard/sales', name: 'app_dashboard_sales')]
+    public function salesIndex(Request $request, SaleRepository $saleRepository): Response
     {
 
         $response = new Response();
 
-        $form = $this->createForm(FilterOrdersType::class, []);
+        $form = $this->createForm(FilterSalesType::class, []);
         $form->handleRequest($request);
 
         $filters = [
@@ -393,17 +449,17 @@ class DashboardController extends AbstractController
                 $filters['dateBetween'] = null;
             }
             
-            $response->headers->setCookie(Cookie::create('filters_orders', base64_encode(json_encode($filters))));
+            $response->headers->setCookie(Cookie::create('filters_sales', base64_encode(json_encode($filters))));
 
         }
         elseif($request->query->get('filters') == 'reset') {
             
-            $response->headers->clearCookie('filters_orders', '/', null);
+            $response->headers->clearCookie('filters_sales', '/', null);
 
         }
-        elseif($request->cookies->get('filters_orders')) {
+        elseif($request->cookies->get('filters_sales')) {
 
-            $filters = json_decode(base64_decode($request->cookies->get('filters_orders')), true);
+            $filters = json_decode(base64_decode($request->cookies->get('filters_sales')), true);
 
             $form->get('query')->setData($filters['query']);
 
@@ -430,19 +486,19 @@ class DashboardController extends AbstractController
 
         if($filters['query'] != null || $filters['grossValueBetween'] != null || $filters['grossValueAnd'] != null || $filters['dateBetween'] != null || $filters['dateAnd'] != null) {
 
-            $orders = $orderRepository->findFilteredOrders($filters);
+            $sales = $saleRepository->findFilteredSales($filters);
         
         }
         else {
 
-            $orders = $orderRepository->findAllOrders();
+            $sales = $saleRepository->findAllSales();
 
         }
 
         $response->sendHeaders();
 
-        return $this->render('dashboard/orders/index.html.twig', [
-            'orders' => $orders,
+        return $this->render('dashboard/sales/index.html.twig', [
+            'sales' => $sales,
             'filtersForm' => $form->createView()
         ]);
 
@@ -459,6 +515,78 @@ class DashboardController extends AbstractController
 
     }
 
+    #[Route('/dashboard/configuration/access/{id}', name: 'app_dashboard_configuration_access_user')]
+    public function configurationAccessUser(Request $request, RoleHierarchyInterface $roleHierarchy, TranslatorInterface $translator, UserRepository $userRepository): Response
+    {
+        $earth = new Earth();
+        $countries = [];
+
+        foreach($earth->getCountries()->toArray() as $country) {
+            $countries[$country['code']] = $country['name'];
+        }
+
+        $id = $request->get('id');
+        $user = $userRepository->findOneBy(['id' => $id]);
+        
+        dd($this->isGranted($this->getUser(), 'ROLE_ADMIN'));
+
+        $roles = [
+            'ROLE_USER' => $translator->trans('Registered user'),
+            'ROLE_TRAINEE' => $translator->trans('Trainee'),
+            'ROLE_FLOOR_STAFF' => $translator->trans('Floor staff'),
+            'ROLE_CUSTOMER_CARE' => $translator->trans('Customer care'),
+            'ROLE_STOCK_KEEPER' => $translator->trans('Stock-keeper'),
+            'ROLE_ACCOUNTANT' => $translator->trans('Accountant'),
+            'ROLE_MANAGER' => $translator->trans('Manager'),
+            'ROLE_ADMIN' => $translator->trans('Administrator'),
+            'ROLE_SUPER_ADMIN' => $translator->trans('Super administrator')
+        ];
+
+        $form = $this->createForm(UserRoleFormType::class, $user);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+
+            $userId = $form->get('user')->getData();
+            $role = $form->get('role')->getData();
+            
+            if($userId != $id) {
+                throw new \Exception('User mismatch.');
+            }
+
+            if($role == 'ROLE_SUPER_ADMIN') {
+                throw new \Exception('Forbidden role ROLE_SUPER_ADMIN.');
+            }
+            
+            if(!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+                if($role == 'ROLE_ADMIN') {
+                    throw new \Exception('Invalid or forbidden role ROLE_ADMIN.');
+                }
+            }
+            elseif(!in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
+                if($role == 'ROLE_MANAGER') {
+                    throw new \Exception('Invalid or forbidden role ROLE_MANAGER.');
+                }
+            }
+            elseif(!in_array('ROLE_MANAGER', $this->getUser()->getRoles())) {
+                throw new \Exception('Invalid role.');
+            }
+
+
+
+        }
+
+
+
+        return $this->render('dashboard/configuration/access/user/index.html.twig', [
+            'roleForm' => $form->createView(),
+            'user' => $user,
+            'countries' => $countries,
+            'roles' => $roles
+        ]);
+
+    }
+
     #[Route('/dashboard/configuration/access', name: 'app_dashboard_configuration_access')]
     public function configurationAccessIndex(Request $request, TranslatorInterface $translator, UserRepository $userRepository): Response
     {
@@ -470,13 +598,15 @@ class DashboardController extends AbstractController
 
         $filters = [
             'query' => null,
-            'email' => null
+            'email' => null,
+            'role' => null
         ];
 
         if($form->isSubmitted() && $form->isValid()) {
 
             $filters['query'] = $form->get('query')->getData();
             $filters['email'] = $form->get('email')->getData();
+            $filters['role'] = $form->get('role')->getData();
             
             $response->headers->setCookie(Cookie::create('filters_access', base64_encode(json_encode($filters))));
 
@@ -488,7 +618,7 @@ class DashboardController extends AbstractController
         }
         elseif($request->cookies->get('filters_access')) {
 
-            $filters = json_decode(base64_decode($request->cookies->get('filters_orders')), true);
+            $filters = json_decode(base64_decode($request->cookies->get('filters_sales')), true);
             
             if(isset($filters['query'])) {
 
@@ -501,10 +631,16 @@ class DashboardController extends AbstractController
                 $form->get('email')->setData($filters['email']);
 
             }
+
+            if(isset($filters['role'])) {
+
+                $form->get('role')->setData($filters['role']);
+
+            }
             
         }
 
-        if(isset($filters['query']) && $filters['query'] != null || isset($filters['email']) && $filters['email'] != null) {
+        if(isset($filters['query']) && $filters['query'] != null || isset($filters['email']) && $filters['email'] != null || isset($filters['role']) && $filters['role'] != null) {
 
             $users = $userRepository->findFilteredUsers($filters);
         
@@ -516,7 +652,15 @@ class DashboardController extends AbstractController
         }
 
         $roles = [
-            'ROLE_USER' => $translator->trans('Registered user')
+            'ROLE_USER' => $translator->trans('Registered user'),
+            'ROLE_TRAINEE' => $translator->trans('Trainee'),
+            'ROLE_FLOOR_STAFF' => $translator->trans('Floor staff'),
+            'ROLE_CUSTOMER_CARE' => $translator->trans('Customer care'),
+            'ROLE_STOCK_KEEPER' => $translator->trans('Stock-keeper'),
+            'ROLE_ACCOUNTANT' => $translator->trans('Accountant'),
+            'ROLE_MANAGER' => $translator->trans('Manager'),
+            'ROLE_ADMIN' => $translator->trans('Administrator'),
+            'ROLE_SUPER_ADMIN' => $translator->trans('Super administrator')
         ];
 
         $response->sendHeaders();

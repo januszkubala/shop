@@ -57,7 +57,7 @@ class File
     private ?string $square_thumbnail_url = null;
 
     private ?string $fixed_height_thumbnail_url = null;
-
+    
     public function getId(): ?int
     {
         return $this->id;

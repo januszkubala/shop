@@ -3,9 +3,11 @@
 {% if address.region != null %}
     {{ address.region }}<br>
 {% endif %}
-{{ countries[address.country] }} ({{ address.country }})<br>
+{% if address.country is not null %}
+    {{ countries[address.country] }} ({{ address.country }})<br>
+{% endif %}
 <br>
-{% if address.phone != null %}
+{% if address.phone is not null %}
     {% trans %}Tel.{% endtrans %} {{ address.phone }}<br>
 {% endif %}
 {{ address.email }}

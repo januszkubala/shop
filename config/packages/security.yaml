@@ -28,9 +28,9 @@ security:
         ROLE_ACCOUNTANT: ROLE_ACCOUNTANT
         ROLE_MANAGER: ROLE_MANAGER
         ROLE_ADMIN: ROLE_ADMIN
-        ROLE_SUPER_ADMIN: ROLE_SUPER_ADMIN
+        ROLE_SUPER_ADMIN: [ROLE_SUPER_ADMIN, ROLE_ADMIN, ROLE_USER]
     access_control:
-        - { path: ^/dashboard, role: ROLE_ADMIN }
+        - { path: ^/dashboard, roles: [ROLE_SUPER_ADMIN, ROLE_ADMIN] }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 when@test:

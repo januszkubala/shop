@@ -2,22 +2,22 @@
 
 namespace App\Entity;
 
-use App\Repository\OrderRepository;
+use App\Repository\SaleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: OrderRepository::class)]
-#[ORM\Table(name: '`order`')]
-class Order
+#[ORM\Entity(repositoryClass: SaleRepository::class)]
+#[ORM\Table(name: 'sale')]
+class Sale
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\ManyToOne(inversedBy: 'sales')]
     private ?User $user = null;
 
     #[ORM\Column(length: 255)]
@@ -38,8 +38,8 @@ class Order
     #[ORM\Column]
     private ?int $quantity = null;
 
-    #[ORM\OneToMany(mappedBy: 'parent', targetEntity: OrderComponent::class, orphanRemoval: true)]
-    private Collection $orderComponents;
+    #[ORM\OneToMany(mappedBy: 'parent', targetEntity: SaleComponent::class, orphanRemoval: true)]
+    private Collection $saleComponents;
 
     #[ORM\Column(length: 16)]
     private ?string $status = null;
@@ -76,7 +76,7 @@ class Order
 
     public function __construct()
     {
-        $this->orderComponents = new ArrayCollection();
+        $this->saleComponents = new ArrayCollection();
         $this->payments = new ArrayCollection();
     }
 
@@ -170,29 +170,29 @@ class Order
     }
 
     /**
-     * @return Collection<int, OrderComponent>
+     * @return Collection<int, SaleComponent>
      */
-    public function getOrderComponents(): Collection
+    public function getSaleComponents(): Collection
     {
-        return $this->orderComponents;
+        return $this->saleComponents;
     }
 
-    public function addOrderComponent(OrderComponent $orderComponent): self
+    public function addSaleComponent(SaleComponent $saleComponent): self
     {
-        if (!$this->orderComponents->contains($orderComponent)) {
-            $this->orderComponents->add($orderComponent);
-            $orderComponent->setParent($this);
+        if (!$this->saleComponents->contains($saleComponent)) {
+            $this->saleComponents->add($saleComponent);
+            $saleComponent->setParent($this);
         }
 
         return $this;
     }
 
-    public function removeOrderComponent(OrderComponent $orderComponent): self
+    public function removeSaleComponent(SaleComponent $saleComponent): self
     {
-        if ($this->orderComponents->removeElement($orderComponent)) {
+        if ($this->saleComponents->removeElement($saleComponent)) {
             // set the owning side to null (unless already changed)
-            if ($orderComponent->getParent() === $this) {
-                $orderComponent->setParent(null);
+            if ($saleComponent->getParent() === $this) {
+                $saleComponent->setParent(null);
             }
         }
 

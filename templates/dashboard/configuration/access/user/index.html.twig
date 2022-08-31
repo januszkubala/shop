@@ -1,0 +1,98 @@
+
+{% extends 'base-dashboard.html.twig' %}
+
+{% block title %}{{ user.firstName }} {{ user.lastName }}{% endblock %}
+
+{% block sidemenu %}
+
+        <div class="btn-group-vertical d-block" role="group" aria-label="Vertical button group">
+            <a class="btn btn-dark btn-sm p-2 text-start" href="/dashboard/configuration/access">{% trans %}Return{% endtrans %}</a>
+        </div>
+
+{% endblock %}
+
+
+{% block body %}
+
+    <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+    <hr>
+
+        <div class="row">
+        <div class="col-xl-5">
+
+            <h5>{% trans %}Account information{% endtrans %}</h5>
+
+            <table class="table table-sm">
+            <tbody>
+            <tr>
+                <th class="ps-0">{% trans %}Date of registration{% endtrans %}</th>
+                <td>{{ user.dateOfRegistration | date('d.m.y H:i') }}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Email{% endtrans %}</th>
+                <td>{{ user.email }}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Phone{% endtrans %}</th>
+                <td>{{ user.phone }}</td>
+            </tr>
+            <tr>
+                <th class="ps-0">{% trans %}Address{% endtrans %}</th>
+                <td>
+                {% set address = user %}
+                {% include '/chunks/address-nocontact.html.twig' %}
+                </td>
+            </tr>
+            </table>
+
+        </div>
+        <div class="col-xl-7">
+
+            <h5>{% trans %}Access management{% endtrans %}</h5>
+            
+            <p>
+            <b>{% trans %}Current levels (role){% endtrans %}</b>
+            {% set superAdmin = false %}
+            {% for role in user.roles %}
+                {% if role == 'ROLE_SUPER_ADMIN' %}
+                    {% set superAdmin = true %}
+                {% endif %}
+
+                {{ roles[role] }}
+
+            {% endfor %}
+            </p>
+
+            {% if superAdmin %}
+                <div class="alert alert-warning">
+                    {% trans %}This is Super Administrator, such access level allows to manage any other account.
+                    It cannot be deleted itself or suspended.{% endtrans %}
+                </div>
+            {% else %}
+                <hr class="my-3">
+                {{ form_start(roleForm) }}
+                {{ form_widget(roleForm.user, {value: user.id}) }}
+                <div class="row g-3 align-items-center">
+
+                    <div class="col-auto">
+                        {{ form_label(roleForm.role) }}
+                    </div>
+
+                    <div class="col-6">
+                        {{ form_widget(roleForm.role, {attr: {class: 'form-select'}}) }}
+                    </div>
+
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-success">{% trans %}Set privilege{% endtrans %}</button>
+                        {% do roleForm.submit.setRendered %}
+                    </div>
+
+                </div>
+                {{ form_end(roleForm) }}
+            
+            {% endif %}
+
+        </div>
+        </div>
+
+{% endblock %}

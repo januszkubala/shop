@@ -1,0 +1,44 @@
+<nav class="navbar navbar-expand navbar-dark bg-dark">
+<div class="container-fluid">
+
+    <a class="navbar-brand" href="#">Navbar</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="{% trans %}Toggle navigation{% endtrans %}">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navigation">
+
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="/dashboard">{% trans %}Dashboard{% endtrans %}</a></li>
+
+        <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% trans %}Sales{% endtrans %}</a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/dashboard/orders">{% trans %}Orders{% endtrans %}</a></li>
+                <li><a class="dropdown-item" href="/dashboard/payments">{% trans %}Payments{% endtrans %}</a></li>
+                <li><a class="dropdown-item" href="/dashboard/invoices">{% trans %}Invoices{% endtrans %}</a></li>
+                <li><a class="dropdown-item" href="/dashboard/shipments">{% trans %}Shipments{% endtrans %}</a></li>
+                
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/dashboard/stats">{% trans %}Statistics{% endtrans %}</a></li>
+            </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% trans %}Shop{% endtrans %}</a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/dashboard/products">{% trans %}Products{% endtrans %}</a></li>
+                <li><a class="dropdown-item" href="/dashboard/categories">{% trans %}Categories{% endtrans %}</a></li>
+                <li><a class="dropdown-item" href="/dashboard/files">{% trans %}Files{% endtrans %}</a></li>
+                <li><a class="dropdown-item" href="/dashboard/properties">{% trans %}Properties{% endtrans %}</a></li>
+            </ul>
+        </li>
+
+        <li class="nav-item"><a class="nav-link" href="/dashboard/preferences">Preferences</a></li>
+
+    </ul>
+
+    </div>
+</div>
+</nav>

@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Product;
+use App\Entity\OrderComponent;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
  * @extends ServiceEntityRepository<Product>
@@ -16,8 +18,12 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ProductRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private $params;
+
+    public function __construct(ManagerRegistry $registry, ParameterBagInterface $params)
     {
+        $this->params = $params;
+        
         parent::__construct($registry, Product::class);
     }
 
@@ -75,8 +81,6 @@ class ProductRepository extends ServiceEntityRepository
                 
                 $i++;
             }
-            
-            //dd($queryBuilder->getQuery());
 
             return $queryBuilder->getQuery()->getResult();
         }
@@ -86,7 +90,8 @@ class ProductRepository extends ServiceEntityRepository
         }
     }
 
-    public function findOneWithEntitiesBy($where) {
+    public function findOneWithEntitiesBy($where)
+    {
 
         $queryBuilder = $this->createQueryBuilder('p')
             ->addSelect('u')
@@ -105,48 +110,142 @@ class ProductRepository extends ServiceEntityRepository
             ->leftJoin('p.file', 'f')
         ;
         
-            foreach($where as $field => $value) {
-                $queryBuilder
-                    ->andWhere('p.' . $field . ' = :value')
-                    ->setParameter('value', $value)
-                ;
+        foreach($where as $field => $value) {
+            $queryBuilder
+                ->andWhere('p.' . $field . ' = :value')
+                ->setParameter('value', $value)
+            ;
+        }
+
+        $queryBuilder
+            ->addOrderBy('pr.date', 'DESC')
+            ->addOrderBy('s.date', 'DESC')
+        ;
+
+        $result = $queryBuilder
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+
+        if($result) {
+
+            foreach($result->getFiles() as $file) {
+
+                $host = null;
+
+                switch($file->getSource()) {
+
+                    case 'local_cdn':
+                    default: {
+
+                        $host = $this->params->get('local_cdn');
+
+                    } break;
+                }
+
+                $file->setUrl($host . $file->getFileName() . '.' . $file->getExtension());
+
+                switch($file->getMimeType()) {
+
+                    case 'image/jpeg':
+                    case 'image/png':
+                    case 'image/gif': {
+
+                        $file->setSquareThumbnailUrl($host . $file->getFileName() . '_thumb.' . $file->getExtension());
+                        $file->setFixedHeightThumbnailUrl($host . $file->getFileName() . '_thumb_h.' . $file->getExtension());
+
+                    } break;
+
+                }
+
             }
 
-            $queryBuilder
-                ->orderBy('pr.date', 'DESC')
-            ;
+            if($result->getNormalLevel() > 0 || $result->getWarningLevel() > 0 || $result->getCriticalLevel() > 0) {
 
-            return $queryBuilder
-                ->getQuery()
-                ->getOneOrNullResult()
-            ;
-        ;
+
+                if($result->getNormalLevel() > 0 && $result->getStock() > 0) {
+                    
+                    $result->setStockLevel( (int) ( $result->getStock() * 100 / $result->getNormalLevel() ) );
+
+                    if($result->getStockLevel() > 100) {
+
+                        $result->setStockLevel(100);
+
+                    }
+
+                }
+
+                if($result->getStock() <= 0) {
+                    
+                    $result->setStockLevelIndicator('out_of_stock');
+
+                    if(!is_numeric($result->getStockLevel())) {
+                        $result->setStockLevel(100);
+                    }
+
+                }
+                elseif($result->getCriticalLevel() && $result->getCriticalLevel() >= $result->getStock()) {
+                    
+                    $result->setStockLevelIndicator('critical');
+
+                    if(!is_numeric($result->getStockLevel())) {
+                        $result->setStockLevel(10);
+                    }
+
+                }
+                elseif($result->getWarningLevel() && $result->getWarningLevel() >= $result->getStock()) {
+                    
+                    $result->setStockLevelIndicator('warning');
+
+                    if(!is_numeric($result->getStockLevel())) {
+                        $result->setStockLevel(50);
+                    }
+
+                }
+                elseif($result->getCriticalLevel() && $result->getCriticalLevel() >= $result->getStock()) {
+                    
+                    $result->setStockLevelIndicator('critical');
+
+                    if(!is_numeric($result->getStockLevel())) {
+                        $result->setStockLevel(10);
+                    }
+
+                }
+                else {
+
+                    $result->setStockLevelIndicator('normal');
+
+                    if(!is_numeric($result->getStockLevel())) {
+                        $result->setStockLevel(100);
+                    }
+
+                }
+
+            }
+
+            if(!$result->getStockLevelIndicator()) {
+                if($result->getStock() > 10) {
+                    $result->setStockLevel(100);
+                    $result->setStockLevelIndicator('out_of_stock');
+                }
+                elseif($result->getStock() > 5) {
+                    $result->setStockLevel(50);
+                    $result->setStockLevelIndicator('warning');
+                }
+                elseif($result->getStock() > 1) {
+                    $result->setStockLevel(10);
+                    $result->setStockLevelIndicator('critical');
+                }
+                else {
+                    $result->setStockLevel(0);
+                    $result->setStockLevelIndicator('out_of_stock');
+                }
+            }
+            
+        }
+
+        return $result;
 
     }
 
-
-//    /**
-//     * @return Product[] Returns an array of Product objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Product
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }

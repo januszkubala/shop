@@ -1,0 +1,11 @@
+<div class="progress w-100 my-2" style="height:.5rem">
+    {% if product.stockLevelIndicator == 'normal' %}
+        <div class="progress-bar bg-success" style="width:{{ product.stockLevel }}%"></div>
+    {% elseif product.stockLevelIndicator == 'warning' %}
+        <div class="progress-bar bg-warning" style="width:{{ product.stockLevel }}%"></div>
+    {% elseif product.stockLevelIndicator == 'critical' %}
+        <div class="progress-bar bg-danger" style="width:{{ product.stockLevel }}%"></div>
+    {% else %}
+        <div class="progress-bar bg-danger" style="width:{{ product.stockLevel }}%"></div>
+    {% endif %}
+</div>

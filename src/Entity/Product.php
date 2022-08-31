@@ -38,6 +38,15 @@ class Product
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: Stock::class, orphanRemoval: true)]
     private Collection $stocks;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $normal_level = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $warning_level = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $critical_level = null;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
@@ -76,6 +85,10 @@ class Product
 
     #[ORM\ManyToOne]
     private ?File $default_image = null;
+
+    private ?int $stock_level = null;
+
+    private ?string $stock_level_indicator = null;
 
     public function __construct()
     {
@@ -225,6 +238,42 @@ class Product
                 $stock->setProduct(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNormalLevel(): ?int
+    {
+        return $this->normal_level;
+    }
+
+    public function setNormalLevel(?int $normal_level): self
+    {
+        $this->normal_level = $normal_level;
+
+        return $this;
+    }
+
+    public function getWarningLevel(): ?int
+    {
+        return $this->warning_level;
+    }
+
+    public function setWarningLevel(?int $warning_level): self
+    {
+        $this->warning_level = $warning_level;
+
+        return $this;
+    }
+
+    public function getCriticalLevel(): ?int
+    {
+        return $this->critical_level;
+    }
+
+    public function setCriticalLevel(?int $critical_level): self
+    {
+        $this->critical_level = $critical_level;
 
         return $this;
     }
@@ -418,6 +467,30 @@ class Product
     public function setDefaultImage(?File $default_image): self
     {
         $this->default_image = $default_image;
+
+        return $this;
+    }
+
+    function getStockLevel(): ?int
+    {
+        return $this->stock_level;
+    }
+
+    function setStockLevel(?int $stock_level)
+    {
+        $this->stock_level = $stock_level;
+
+        return $this;
+    }
+
+    function getStockLevelIndicator(): ?string
+    {
+        return $this->stock_level_indicator;
+    }
+
+    function setStockLevelIndicator(?string $stock_level_indicator)
+    {
+        $this->stock_level_indicator = $stock_level_indicator;
 
         return $this;
     }

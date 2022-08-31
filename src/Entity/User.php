@@ -35,8 +35,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Product::class)]
     private Collection $products;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Order::class)]
-    private Collection $orders;
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Sale::class)]
+    private Collection $sales;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Payment::class)]
     private Collection $payments;
@@ -71,7 +71,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->products = new ArrayCollection();
-        $this->orders = new ArrayCollection();
+        $this->sales = new ArrayCollection();
         $this->payments = new ArrayCollection();
     }
 
@@ -109,7 +109,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        // Update: this must be persisted during registration
+        // $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -176,29 +177,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Order>
+     * @return Collection<int, Sale>
      */
-    public function getOrders(): Collection
+    public function getSales(): Collection
     {
-        return $this->orders;
+        return $this->sales;
     }
 
-    public function addOrder(Order $order): self
+    public function addSale(Sale $sale): self
     {
-        if (!$this->orders->contains($order)) {
-            $this->orders->add($order);
-            $order->setUser($this);
+        if (!$this->sales->contains($sale)) {
+            $this->sales->add($sale);
+            $sale->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeOrder(Order $order): self
+    public function removeSale(Sale $sale): self
     {
-        if ($this->orders->removeElement($order)) {
+        if ($this->sales->removeElement($sale)) {
             // set the owning side to null (unless already changed)
-            if ($order->getUser() === $this) {
-                $order->setUser(null);
+            if ($sale->getUser() === $this) {
+                $sale->setUser(null);
             }
         }
 

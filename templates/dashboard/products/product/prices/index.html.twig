@@ -64,9 +64,8 @@ $("table.table-hover").on("click", "[data-href]", function() {
 
 {% block body %}
 
-    <h1 class="me-0">{% trans %}Prices{% endtrans %}</h1>
-    <h5 class="ms-0">{{ product.name }}</h5>
-    <hr>
+    {% set title = 'Prices'|trans %}
+    {% include 'chunks/product-dashboard-header.html.twig' %}
 
         <div class="row">
         <div class="col-xl-4">

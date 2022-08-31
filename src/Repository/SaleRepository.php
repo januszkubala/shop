@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\Order;
+use App\Entity\Sale;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Order>
+ * @extends ServiceEntityRepository<Sale>
  *
- * @method Order|null find($id, $lockMode = null, $lockVersion = null)
- * @method Order|null findOneBy(array $criteria, array $orderBy = null)
- * @method Order[]    findAll()
- * @method Order[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Sale|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Sale|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Sale[]    findAll()
+ * @method Sale[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class OrderRepository extends ServiceEntityRepository
+class SaleRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Order::class);
+        parent::__construct($registry, Sale::class);
     }
 
-    public function add(Order $entity, bool $flush = false): void
+    public function add(Sale $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class OrderRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Order $entity, bool $flush = false): void
+    public function remove(Sale $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -39,7 +39,7 @@ class OrderRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllOrders(): array
+    public function findAllSales(): array
     {
 
         return $queryBuilder = $this->createQueryBuilder('o')
@@ -50,8 +50,7 @@ class OrderRepository extends ServiceEntityRepository
 
     }
 
-
-    public function findFilteredOrders($filters): array
+    public function findFilteredSales($filters): array
     {
 
         $queryBuilder = $this->createQueryBuilder('o');
@@ -124,30 +123,28 @@ class OrderRepository extends ServiceEntityRepository
 
     }
 
+    public function findLastSalesForProduct($product, $limit): ?array
+    {
 
+        $queryBuilder = $this->createQueryBuilder('o')
+            //->addSelect('oc')
+            //->leftJoin('App\Entity\OrderComponent', 'oc')
+            //->where('oc.product = 1')
+        ;
+/*
+        $queryBuilder
+            ->where('oc.product = :value')
+            ->setParameter('value', 1)
+        ;
+*/
 
-//    /**
-//     * @return Order[] Returns an array of Order objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('o.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+        //dd($queryBuilder->getQuery());
 
-//    public function findOneBySomeField($value): ?Order
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        return $queryBuilder
+            ->getQuery()
+            ->getResult()
+        ;
+
+    }
+
 }

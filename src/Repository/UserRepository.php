@@ -103,8 +103,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             }
         }
 
-        return $queryBuilder
-            ->getQuery()
+        if($filters['email'] != null) {
+            $queryBuilder
+                ->andWhere('u.email LIKE :value')
+                ->setParameter(':value', $filters['email']);
+        }
+
+        if($filters['role'] != null) {
+            $queryBuilder
+                ->andWhere('u.roles LIKE :value')
+                ->setParameter(':value', '%' . $filters['role'] . '%');
+        }
+
+        return $queryBuilder->getQuery()
             ->getResult()
         ;
 

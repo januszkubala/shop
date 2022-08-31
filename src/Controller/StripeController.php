@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Order;
+use App\Entity\Sale;
 use App\Entity\Payment;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -54,7 +54,7 @@ class StripeController extends AbstractController
 
         $paymentMethod = $paymentConfirmation->charges->data[0]->payment_method_details->card;
         
-        $order = $entityManager->getRepository(Order::class)->findOneBy(['ref' => $request->get('ref')]);
+        $sale = $entityManager->getRepository(Sale::class)->findOneBy(['ref' => $request->get('ref')]);
         
         $expiryDate = \DateTime::createFromFormat('m-Y', ($paymentMethod->exp_month . '-' . $paymentMethod->exp_year));
         $expiryDate->modify('last day of this month')->setTime(23,59,59);
@@ -62,8 +62,8 @@ class StripeController extends AbstractController
         $guid = $uuid = Uuid::uuid4();
 
         $payment = new Payment();
-        $payment->setUser($order->getUser());
-        $payment->setAllocation($order);
+        $payment->setUser($sale->getUser());
+        $payment->setAllocation($sale);
         $payment->setAmount(number_format($paymentConfirmation->amount_received / 100, 2, ".", ""));
         $payment->setRef($guid);
         $payment->setSystemRef($paymentConfirmation->id);
@@ -81,8 +81,8 @@ class StripeController extends AbstractController
 
             $payment->setDateCompleted(\DateTime::createFromFormat('U', $paymentConfirmation->charges->data[0]->created));
             $response->headers->removeCookie('cart', '/', null);
-            $order->setStatus('paid');
-            $entityManager->persist($order);
+            $sale->setStatus('paid');
+            $entityManager->persist($sale);
 
         }
         
@@ -91,7 +91,7 @@ class StripeController extends AbstractController
 
         if($paymentConfirmation->status == 'succeeded') {
 
-            return $this->redirectToRoute('app_stripe_create_charge', $orderData);
+            return $this->redirectToRoute('app_stripe_create_charge', $saleData);
 
         }
 

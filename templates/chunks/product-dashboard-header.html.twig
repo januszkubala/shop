@@ -1,0 +1,16 @@
+{% if product.defaultImage is not null %}
+    <div class="d-flex">
+        <div class="flex-shrink-0">
+        <img src="{{ product.defaultImage.squareThumbnailUrl }}" alt="{{ product.defaultImage.alt }}" style="height:6rem">
+        </div>
+        <div class="flex-grow-1 ms-3">
+            <h1 class="me-0">{{ title }}</h1>
+            <h6 class="ms-0">{{ product.name }}</h6>
+        </div>
+    </div>
+{% else %}
+    <h1 class="me-0">{% trans %}Stock{% endtrans %}</h1>
+    <h6 class="ms-0">{{ product.name }}</h6>
+{% endif %}
+
+<hr>
